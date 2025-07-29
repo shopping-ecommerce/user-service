@@ -31,6 +31,7 @@ public class UserServiceImpl implements UserService {
     private final ObjectMapper objectMapper;
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private String test;
 
     /**
      * Creates a new user based on the provided UserCreationRequest.
