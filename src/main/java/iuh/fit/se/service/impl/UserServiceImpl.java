@@ -56,16 +56,15 @@ public class UserServiceImpl implements UserService {
     /**
      * Updates an existing user identified by the given id.
      *
-     * @param id the id of the user to be updated
      * @param request the UserUpdateRequest containing updated user details
      * @return UserResponse the updated user details
      */
     @Override
-    public UserResponse updateUser(String id, UserUpdateRequest request) {
-        User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+    public UserResponse updateUser(UserUpdateRequest request) {
+        User user = userRepository.findById(request.getId()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         userMapper.updateUser(user, request);
         user.setModifiedTime(LocalDateTime.now());
-        return objectMapper.convertValue(userRepository.save(user), UserResponse.class);
+        return userMapper.toUserResponse(userRepository.save(user));
     }
 
     /**

@@ -2,6 +2,7 @@ package iuh.fit.se.dto.request;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import iuh.fit.se.enums.UserStatusEnum;
 import iuh.fit.se.enums.UserTierEnum;
 import lombok.AccessLevel;
@@ -16,12 +17,14 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 // @JsonIgnoreProperties(value = {"email"})
 public class UserUpdateRequest {
+    @JsonProperty("id")
+    String id;
+    @JsonProperty("firstName")
     String firstName;
+    @JsonProperty("lastName")
     String lastName;
-    int points;
-    UserTierEnum tier;
+    @JsonProperty("address")
     String address;
+    @JsonProperty("publicId")
     String publicId;
-    UserStatusEnum status;
-    LocalDateTime modifiedTime;
 }

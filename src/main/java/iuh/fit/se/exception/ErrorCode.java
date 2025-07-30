@@ -28,6 +28,8 @@ public enum ErrorCode {
             HttpStatus.BAD_REQUEST),
     UNAUTHENTICATED(1008, "Email or password is incorrect", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(1009, "You are not authorized to perform this action", HttpStatus.BAD_REQUEST),
+    SELLER_EXISTS(1010, "Seller already exists", HttpStatus.BAD_REQUEST),
+    SELLER_NOT_FOUND(1011, "Seller not found", HttpStatus.NOT_FOUND),
     ;
     int code;
     String message;
