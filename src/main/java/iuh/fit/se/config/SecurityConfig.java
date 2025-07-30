@@ -19,7 +19,9 @@ import lombok.RequiredArgsConstructor;
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private final String[] PULIC_ENDPOINTS = {"/profiles/create"};
+    private final String[] PULIC_ENDPOINTS = {"/profiles/create",
+            "/sellers/**",
+    };
     private final JwtUtil jwtUtil;
 
     private CustomJwtDecoder customJwtDecoder;
@@ -27,9 +29,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
-                .authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, PULIC_ENDPOINTS)
+                .authorizeHttpRequests(request -> request.requestMatchers(PULIC_ENDPOINTS)
                         .permitAll()
-                        //                        .requestMatchers(HttpMethod.GET, "/users/**")
                         //                        .hasRole(UserRoleEnum.MANAGER.name())
                         .anyRequest()
                         .authenticated())

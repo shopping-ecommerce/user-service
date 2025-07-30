@@ -55,4 +55,9 @@ public class User {
         this.createdTime = LocalDateTime.now();
         this.modifiedTime = LocalDateTime.now();
     }
+
+    @PreUpdate
+    void updateModifiedTime() {
+        this.modifiedTime = LocalDateTime.now();
+    }
 }
