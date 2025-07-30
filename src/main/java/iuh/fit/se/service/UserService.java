@@ -13,7 +13,7 @@ public interface UserService {
 
     UserResponse createUser(UserCreationRequest request);
 
-    UserResponse updateUser(String id, UserUpdateRequest request);
+    UserResponse updateUser(UserUpdateRequest request);
 
     void deleteUser(String id);
 

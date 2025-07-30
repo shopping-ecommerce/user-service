@@ -3,6 +3,9 @@ package iuh.fit.se.controller;
 import java.util.List;
 import java.util.Map;
 
+import iuh.fit.se.dto.request.SellerRegistrationRequest;
+import iuh.fit.se.dto.response.SellerResponse;
+import iuh.fit.se.service.SellerService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/profiles")
 public class UserController {
     UserService userService;
+    SellerService sellerService;
 
     /**
      * Get all users.
@@ -89,10 +93,10 @@ public class UserController {
      * @param request the user update request containing updated user details
      * @return the updated user
      */
-    @PutMapping("/{id}")
-    public ApiResponse<UserResponse> updateUser(@PathVariable String id, @RequestBody UserUpdateRequest request) {
+    @PostMapping("/updateProfile")
+    public ApiResponse<UserResponse> updateUser(@RequestBody UserUpdateRequest request) {
         return ApiResponse.<UserResponse>builder()
-                .result(userService.updateUser(id, request))
+                .result(userService.updateUser(request))
                 .build();
     }
 
@@ -127,4 +131,6 @@ public class UserController {
                 .result(userService.findByAccount(id))
                 .build();
     }
+
+
 }
