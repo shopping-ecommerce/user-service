@@ -2,17 +2,18 @@ package iuh.fit.se.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
-import iuh.fit.se.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+
+import java.util.stream.Collectors;
 
 @Configuration
 @EnableWebSecurity
@@ -20,9 +21,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final String[] PULIC_ENDPOINTS = {"/profiles/create",
-            "/sellers/**",
+            "profiles/**",
     };
-    private final JwtUtil jwtUtil;
 
     private CustomJwtDecoder customJwtDecoder;
 
@@ -47,8 +47,24 @@ public class SecurityConfig {
     JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
         jwtGrantedAuthoritiesConverter.setAuthorityPrefix("");
+//        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+//        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
+        // customize để nhận roles va scopes
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
-        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
+        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwt -> {
+            // Đọc cả "roles" và "scopes" từ token
+            var roles = jwt.getClaimAsStringList("roles");
+            var scopes = jwt.getClaimAsStringList("scopes");
+
+            // Kết hợp tất cả thành danh sách GrantedAuthority
+            return java.util.stream.Stream.concat(
+                            roles != null ? roles.stream() : java.util.stream.Stream.empty(),
+                            scopes != null ? scopes.stream() : java.util.stream.Stream.empty()
+                    )
+                    .filter(java.util.Objects::nonNull)
+                    .map(SimpleGrantedAuthority::new)
+                    .collect(Collectors.toList());
+        });
         return jwtAuthenticationConverter;
     }
 }

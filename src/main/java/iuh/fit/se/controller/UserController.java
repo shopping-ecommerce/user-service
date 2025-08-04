@@ -21,6 +21,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
@@ -36,7 +37,7 @@ public class UserController {
      *
      * @return a list of all users
      */
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ApiResponse<List<UserResponse>> getUsers() {
         return ApiResponse.<List<UserResponse>>builder()
@@ -50,6 +51,7 @@ public class UserController {
      * @param id the unique ID of the user
      * @return the user information
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public ApiResponse<UserResponse> getUser(@PathVariable String id) {
         return ApiResponse.<UserResponse>builder()
@@ -89,10 +91,10 @@ public class UserController {
     /**
      * Update an existing user.
      *
-     * @param id      the unique ID of the user to update
      * @param request the user update request containing updated user details
      * @return the updated user
      */
+    @PreAuthorize("hasAuthority('UPDATE_USER')")
     @PostMapping("/updateProfile")
     public ApiResponse<UserResponse> updateUser(@RequestBody UserUpdateRequest request) {
         return ApiResponse.<UserResponse>builder()
@@ -106,6 +108,7 @@ public class UserController {
      * @param id the unique ID of the user to delete
      * @return a confirmation message
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ApiResponse<String> deleteUser(@PathVariable String id) {
         userService.deleteUser(id);
@@ -132,5 +135,12 @@ public class UserController {
                 .build();
     }
 
+    @PostMapping("/updateAvatar")
+    public ApiResponse<UserResponse> uploadAvatar(@RequestParam("files") MultipartFile files,
+                                                              @RequestParam("id") String id) {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.updateAvatar(id,files))
+                .build();
+    }
 
 }

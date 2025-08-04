@@ -9,7 +9,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -20,22 +22,31 @@ import java.util.List;
 @RequestMapping("/sellers")
 public class SellerController {
     SellerService sellerService;
+
+    @PreAuthorize("hasAuthority('CREATE_SELLER')")
     @PostMapping("/registrationSeller")
-    public ApiResponse<SellerResponse> registrationSeller(@RequestBody SellerRegistrationRequest request) {
+    public ApiResponse<SellerResponse> registrationSeller(@RequestPart("avatar")MultipartFile avatar,
+                                                          @RequestPart("identifications") List<MultipartFile> identifications,
+                                                          @RequestParam("userId") String userId,
+                                                          @RequestParam("shopName") String shopName) {
         return ApiResponse.<SellerResponse>builder()
                 .code(200)
-                .result(sellerService.createSeller(request))
+                .result(sellerService.createSeller(avatar, identifications, userId, shopName))
                 .build();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/verifySeller")
     public ApiResponse<SellerResponse> verifySeller(@RequestBody SellerVerifyRequest request) {
+
         return ApiResponse.<SellerResponse>builder()
                 .code(200)
                 .result(sellerService.verifySeller(request))
                 .build();
     }
 
+
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/sellerPending")
     public ApiResponse<List<SellerResponse>> searchSellerPending() {
         List<SellerResponse> sellers = sellerService.searchSellerPending();
@@ -50,6 +61,17 @@ public class SellerController {
                 .code(200)
                 .message("Sellers retrieved successfully")
                 .result(sellers)
+                .build();
+    }
+
+    @PreAuthorize("hasAuthority('UPDATE_SELLER')")
+    @PostMapping("/updateInfSeller")
+    public ApiResponse<SellerResponse> updateInfSeller(@RequestPart("avatar") MultipartFile avatar,
+                                                       @RequestParam("sellerId") String sellerId,
+                                                       @RequestParam("shopName") String shopName) {
+        return ApiResponse.<SellerResponse>builder()
+                .code(200)
+                .result(sellerService.updateInfSeller(sellerId,  shopName,avatar))
                 .build();
     }
 }
