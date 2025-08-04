@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import feign.FeignException;
+import iuh.fit.se.dto.response.FileClientResponse;
+import iuh.fit.se.repository.httpclient.FileClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +26,7 @@ import iuh.fit.se.repository.UserRepository;
 import iuh.fit.se.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +35,7 @@ public class UserServiceImpl implements UserService {
     private final ObjectMapper objectMapper;
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private String test;
+    private final FileClient fileClient;
 
     /**
      * Creates a new user based on the provided UserCreationRequest.
@@ -42,8 +46,9 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserResponse createUser(UserCreationRequest request) {
-        log.info("1111111111: " + request.getFirstName() + " " + request.getLastName() + request.getAccountId());
+        log.info("1111111111: " + request.getFirstName() + " " + request.getLastName() + request.getAccountId()+ request.getPublicId());
         // Ánh xạ và lưu user
+        request.setPublicId("https://shopping-iuh-application.s3.ap-southeast-1.amazonaws.com/DefaultAvatar.jpg");
         User user = userMapper.toUser(request);
         user.setAccountId(request.getAccountId());
         //        user.setFirstName(request.getFirstName());
@@ -173,6 +178,26 @@ public class UserServiceImpl implements UserService {
                                 .contains(searchLower))
                 .collect(Collectors.toList());
         return objectMapper.convertValue(filteredUsers, new TypeReference<List<UserResponse>>() {});
+    }
+
+    @Override
+    public UserResponse updateAvatar(String userId, MultipartFile file) {
+        log.info("Bắt đầu tải lên avatar cho userId: {}, tên tệp: {}", userId, file.getOriginalFilename());
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        if (file == null || file.isEmpty()) {
+            log.error("Tệp avatar rỗng hoặc null cho userId: {}", userId);
+        }
+        try {
+            log.info("Gửi yêu cầu tải lên tệp {} đến File Service", file.getOriginalFilename());
+            FileClientResponse fileClientResponse = fileClient.uploadFile(List.of(file));
+            log.info("Phản hồi từ File Service: {}", fileClientResponse.getMessage());
+            user.setPublicId(fileClientResponse.getResult().get(0));
+            return userMapper.toUserResponse(userRepository.save(user));
+        } catch (FeignException e) {
+            log.error("Lỗi khi gọi File Service cho userId {}: {}", userId, e.getMessage(), e);
+            throw new AppException(ErrorCode.UPLOAD_FILE_FAILED);
+        }
     }
 
     //    @Override

@@ -5,6 +5,7 @@ import java.util.List;
 import iuh.fit.se.dto.request.UserCreationRequest;
 import iuh.fit.se.dto.request.UserUpdateRequest;
 import iuh.fit.se.dto.response.UserResponse;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface UserService {
     UserResponse findById(String id);
@@ -26,4 +27,6 @@ public interface UserService {
     void deleteUsers(List<String> ids);
 
     List<UserResponse> searchUsers(String searchQuery);
+
+    UserResponse updateAvatar (String userId,MultipartFile file);
 }
