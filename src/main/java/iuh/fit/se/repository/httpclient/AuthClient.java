@@ -9,7 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "auth-client",url = "${auth.service.url}", configuration = {AuthenticationRequestInterceptor.class, FeignConfiguration.class})
+@FeignClient(name = "auth-service", configuration = {AuthenticationRequestInterceptor.class, FeignConfiguration.class})
 public interface AuthClient {
     @PostMapping(value = "/assign-role" , consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
     AuthClientResponse assignRoleToUser(@RequestBody AssignRoleRequest request);

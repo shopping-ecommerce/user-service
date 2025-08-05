@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
-@FeignClient(name = "fileService", url = "${file.service.url}", configuration = {FileClient.FormConfig.class, AuthenticationRequestInterceptor.class})
+@FeignClient(name = "file-service", configuration = {FileClient.FormConfig.class, AuthenticationRequestInterceptor.class})
 public interface FileClient {
     @PostMapping(value = "/s3/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     FileClientResponse uploadFile(@RequestPart("files") List<MultipartFile> files);
