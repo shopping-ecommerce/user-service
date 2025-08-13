@@ -53,14 +53,12 @@ public class SellerServiceImpl implements SellerService {
         // 3. Upload Hình
         String avatarURL; ;
         List<String> identificationLinks;
-        try {
+        log.error("Avatar: {}, Identifications: {}", avatar.getOriginalFilename(), identifications.stream().map(MultipartFile::getOriginalFilename).toList());
             FileClientResponse avatarResponse = fileClient.uploadFile(List.of(avatar));
             avatarURL = avatarResponse.getResult().get(0);
             FileClientResponse identificationResponse = fileClient.uploadFile(identifications);
             identificationLinks = identificationResponse.getResult();
-        } catch (FeignException e){
-            throw new AppException(ErrorCode.UPLOAD_FILE_FAILED);
-        }
+
         if (existingSeller.isPresent()) {
             seller = existingSeller.get();
             // Trường hợp REJECTED: Cập nhật bản ghi hiện có
