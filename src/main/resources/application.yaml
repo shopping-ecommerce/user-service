@@ -1,9 +1,11 @@
 server:
   port: 8082
+  servlet:
+    context-path: /info
 
 spring:
   datasource:
-    url: ${DBMS_CONNECTION:jdbc:mariadb://localhost:3306/user_db}
+    url: ${DBMS_CONNECTION:jdbc:mariadb://mariadb:3306/user_db}
     driver-class-name: "org.mariadb.jdbc.Driver"
     username: ${DBMS_USERNAME:root}
     password: ${DBMS_PASSWORD:sapassword}
@@ -24,11 +26,22 @@ spring:
               read-timeout: 120000
             file-service:
                 url: ${FEIGN_FILE:http://file-service:8084/file}
-                connect-timeout: 60000
-                read-timeout: 120000
+                connect-timeout: 30000
+                read-timeout: 60000
             auth-service:
                 url: ${FEIGN_AUTH:http://auth-service:8080/authentication}
                 connect-timeout: 30000
                 read-timeout: 60000
 jwt:
   signerKey: ${JWT_SIGNERKEY:"1TjXchw5FloESb63Kc+DFhTARvpWL4jUGCwfGWxuG5SIf/1y/LgJxHnMqaF6A/ij"}
+
+
+logging:
+  level:
+    iuh.fit.se.service.impl: DEBUG
+    iuh.fit.se.repository.httpclient: DEBUG  # Log Feign clients
+    feign: DEBUG  # Enable Feign logging
+    org.springframework.web: INFO
+    org.springframework.cloud.openfeign: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
