@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import feign.FeignException;
 import iuh.fit.se.dto.response.FileClientResponse;
 import iuh.fit.se.repository.httpclient.FileClient;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -198,6 +199,16 @@ public class UserServiceImpl implements UserService {
             log.error("Lỗi khi gọi File Service cho userId {}: {}", userId, e.getMessage(), e);
             throw new AppException(ErrorCode.UPLOAD_FILE_FAILED);
         }
+    }
+
+    @Override
+    public UserResponse getMyInfo() {
+        String accountId = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByAccountId(accountId);
+        if(user == null) {
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+        }
+        return userMapper.toUserResponse(user);
     }
 
     //    @Override

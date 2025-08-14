@@ -143,4 +143,10 @@ public class UserController {
                 .build();
     }
 
+    @GetMapping("/getMyProfile")
+    public ApiResponse<UserResponse> myInfo(){
+    return ApiResponse.<UserResponse>builder()
+            .result(userService.getMyInfo())
+            .build();
+    }
 }
