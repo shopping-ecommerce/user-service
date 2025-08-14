@@ -29,4 +29,6 @@ public interface UserService {
     List<UserResponse> searchUsers(String searchQuery);
 
     UserResponse updateAvatar (String userId,MultipartFile file);
+
+    UserResponse getMyInfo();
 }
