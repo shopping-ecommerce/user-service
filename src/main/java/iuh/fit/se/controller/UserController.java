@@ -51,7 +51,6 @@ public class UserController {
      * @param id the unique ID of the user
      * @return the user information
      */
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public ApiResponse<UserResponse> getUser(@PathVariable String id) {
         return ApiResponse.<UserResponse>builder()

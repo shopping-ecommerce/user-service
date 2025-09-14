@@ -36,6 +36,8 @@ public class Seller {
     @Column(name = "identification_link")
     List<String> identificationLinks;
 
+    String address;
+
     double wallet;
 
     @Enumerated(EnumType.STRING)

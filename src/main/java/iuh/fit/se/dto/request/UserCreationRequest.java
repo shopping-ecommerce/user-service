@@ -35,7 +35,7 @@ public class UserCreationRequest {
     @JsonProperty("lastName")
     String lastName;
 
-    @NotEmpty(message = "Address must not be empty")
+//    @NotEmpty(message = "Address must not be empty")
     String address;
 
     int points;
