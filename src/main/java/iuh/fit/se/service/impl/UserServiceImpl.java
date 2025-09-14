@@ -131,7 +131,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse findById(String id) {
         Optional<User> user = userRepository.findById(id);
-        return objectMapper.convertValue(user.get(), UserResponse.class);
+        return userMapper.toUserResponse(user.orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND)));
     }
 
     public UserResponse findByAccount(String accountId) {

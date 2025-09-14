@@ -30,4 +30,6 @@ public class SellerRegistrationRequest {
 
     @JsonProperty("identificationLinks")
     List<String> identificationLinks;
+
+    String address;
 }

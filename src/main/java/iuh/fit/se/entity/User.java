@@ -47,6 +47,7 @@ public class User {
     @Column(name = "public_id")
     String publicId;
 
+    String phone;
     @PrePersist
     void generateValue() {
         this.points = 0;
