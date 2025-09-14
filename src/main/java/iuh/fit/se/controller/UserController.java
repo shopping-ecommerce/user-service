@@ -3,7 +3,7 @@ package iuh.fit.se.controller;
 import java.util.List;
 import java.util.Map;
 
-import iuh.fit.se.dto.request.SellerRegistrationRequest;
+import iuh.fit.se.dto.request.*;
 import iuh.fit.se.dto.response.SellerResponse;
 import iuh.fit.se.service.SellerService;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import iuh.fit.se.dto.request.UserCreationRequest;
-import iuh.fit.se.dto.request.UserUpdateRequest;
 import iuh.fit.se.dto.response.ApiResponse;
 import iuh.fit.se.dto.response.UserResponse;
 import iuh.fit.se.service.UserService;
@@ -147,5 +145,58 @@ public class UserController {
     return ApiResponse.<UserResponse>builder()
             .result(userService.getMyInfo())
             .build();
+    }
+
+
+    /**
+     * Add a new address for a user.
+     *
+     * @param request the address add request containing user ID and address details
+     * @return the updated user information
+     */
+    @PostMapping("/address/add")
+    public ApiResponse<UserResponse> addAddress(@RequestBody AddressAddRequest request) {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.addAddress(request))
+                .build();
+    }
+
+    /**
+     * Update an existing address for a user.
+     *
+     * @param request the address update request containing user ID, old address, and new address details
+     * @return the updated user information
+     */
+    @PostMapping("/address/update")
+    public ApiResponse<UserResponse> updateAddress(@RequestBody AddressUpdateRequest request) {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.updateAddress(request))
+                .build();
+    }
+
+    /**
+     * Delete an address for a user.
+     *
+     * @param request the address delete request containing user ID and address to delete
+     * @return the updated user information
+     */
+    @PostMapping("/address/delete")
+    public ApiResponse<UserResponse> removeAddress(@RequestBody AddressDeleteRequest request) {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.removeAddress(request))
+                .build();
+    }
+
+    /**
+     * Set an address as default for a user.
+     *
+     * @param request the address default request containing user ID and address to set as default
+     * @return the updated user information
+     */
+    @PostMapping("/address/default")
+    public ApiResponse<UserResponse> setDefaultAddress(@RequestBody AddressDefaultRequest request) {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.setDefaultAddress(request))
+                .build();
     }
 }

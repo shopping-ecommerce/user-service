@@ -76,7 +76,8 @@ public enum ErrorCode {
     // Session and token errors
     SESSION_EXPIRED(1043, "Session expired", HttpStatus.UNAUTHORIZED),
     TOKEN_EXPIRED(1044, "Token expired", HttpStatus.UNAUTHORIZED),
-    REFRESH_TOKEN_INVALID(1045, "Refresh token invalid", HttpStatus.UNAUTHORIZED);
+    REFRESH_TOKEN_INVALID(1045, "Refresh token invalid", HttpStatus.UNAUTHORIZED),
+    INVALID_ADDRESS(1046, "Invalid address format", HttpStatus.BAD_REQUEST),;
 
     int code;
     String message;

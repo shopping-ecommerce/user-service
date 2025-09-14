@@ -1,7 +1,10 @@
 package iuh.fit.se.dto.response;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
+import iuh.fit.se.entity.Address;
 import iuh.fit.se.enums.UserStatusEnum;
 import iuh.fit.se.enums.UserTierEnum;
 import lombok.*;
@@ -19,9 +22,10 @@ public class UserResponse {
     String lastName;
     int points;
     UserTierEnum tier;
-    String address;
+    List<Address> addresses = new ArrayList<>();
     UserStatusEnum status;
     LocalDateTime createdTime;
     LocalDateTime modifiedTime;
+    String birthdate;
     String publicId;
 }

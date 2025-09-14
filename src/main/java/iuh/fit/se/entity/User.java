@@ -1,6 +1,8 @@
 package iuh.fit.se.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.persistence.*;
 
@@ -35,7 +37,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     UserTierEnum tier;
 
-    String address;
+    @ElementCollection
+    @CollectionTable(name = "user_addresses", joinColumns = @JoinColumn(name = "user_id"))
+    List<Address> addresses = new ArrayList<>(); // Sử dụng List<Address>
     UserStatusEnum status;
 
     @Column(name = "created_time")
@@ -48,6 +52,8 @@ public class User {
     String publicId;
 
     String phone;
+
+    String birthdate;
     @PrePersist
     void generateValue() {
         this.points = 0;
@@ -55,6 +61,8 @@ public class User {
         this.status = UserStatusEnum.AVAILABLE;
         this.createdTime = LocalDateTime.now();
         this.modifiedTime = LocalDateTime.now();
+        this.birthdate = "01-01-2000";
+        this.addresses = new ArrayList<>();
     }
 
     @PreUpdate

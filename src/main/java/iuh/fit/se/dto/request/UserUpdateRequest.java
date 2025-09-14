@@ -23,8 +23,6 @@ public class UserUpdateRequest {
     String firstName;
     @JsonProperty("lastName")
     String lastName;
-    @JsonProperty("address")
-    String address;
-    @JsonProperty("publicId")
-    String publicId;
+    @JsonProperty("birthdate")
+    String birthdate;
 }

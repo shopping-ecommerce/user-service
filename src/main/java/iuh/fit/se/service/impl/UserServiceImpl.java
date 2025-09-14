@@ -6,7 +6,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import feign.FeignException;
+import iuh.fit.se.dto.request.*;
 import iuh.fit.se.dto.response.FileClientResponse;
+import iuh.fit.se.entity.Address;
 import iuh.fit.se.repository.httpclient.FileClient;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -15,8 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import iuh.fit.se.dto.request.UserCreationRequest;
-import iuh.fit.se.dto.request.UserUpdateRequest;
 import iuh.fit.se.dto.response.UserResponse;
 import iuh.fit.se.entity.User;
 import iuh.fit.se.enums.UserStatusEnum;
@@ -170,7 +170,7 @@ public class UserServiceImpl implements UserService {
                 .filter(user -> user.getId().contains(searchQuery)
                         || user.getFirstName().toLowerCase().contains(searchLower)
                         || user.getLastName().toLowerCase().contains(searchLower)
-                        || user.getAddress().toLowerCase().contains(searchLower)
+//                        || user.getAddress().toLowerCase().contains(searchLower)
                         || (user.getFirstName().toLowerCase() + " "
                                         + user.getLastName().toLowerCase())
                                 .contains(searchLower)
@@ -211,11 +211,187 @@ public class UserServiceImpl implements UserService {
         return userMapper.toUserResponse(user);
     }
 
-    //    @Override
-    //    public UserResponse getMyInfo() {
-    //        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-    //        User user = userRepository.findByEmail(email).orElseThrow(() -> new
-    //                AppException(ErrorCode.USER_NOT_FOUND));
-    //        return userMapper.toUserResponse(user);
-    //    }
+
+    @Transactional
+    @Override
+    public UserResponse addAddress(AddressAddRequest request) {
+        log.info("Adding address {} for user {}", request.getAddress().getAddress(), request.getUserId());
+        validateAddress(request.getAddress());
+        if (request.getUserId() == null || request.getUserId().trim().isEmpty()) {
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        if (user.getAddresses().stream().anyMatch(addr -> addr.getAddress().equals(request.getAddress().getAddress()))) {
+            throw new AppException(ErrorCode.INVALID_ADDRESS);
+        }
+
+        if (request.getAddress().isDefault()) {
+            user.getAddresses().forEach(addr -> addr.setDefault(false));
+        }
+
+        user.getAddresses().add(request.getAddress());
+        ensureSingleDefaultAddress(user.getAddresses());
+        user.getAddresses().size(); // Đánh dấu danh sách là "dirty"
+        user.setModifiedTime(LocalDateTime.now());
+        return userMapper.toUserResponse(userRepository.save(user));
+    }
+
+    @Transactional
+    @Override
+    public UserResponse updateAddress(AddressUpdateRequest request) {
+        log.info("Updating address from {} to {} for user {}", request.getOldAddress(), request.getNewAddress().getAddress(), request.getUserId());
+        validateAddress(request.getNewAddress());
+        if (request.getOldAddress() == null || request.getOldAddress().trim().isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_ADDRESS);
+        }
+
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        Address addressToUpdate = null;
+        for (Address addr : user.getAddresses()) {
+            if (addr.getAddress().equals(request.getOldAddress())) {
+                addressToUpdate = addr;
+                break;
+            }
+        }
+
+        if (addressToUpdate == null) {
+            throw new AppException(ErrorCode.INVALID_ADDRESS);
+        }
+
+        if (!request.getOldAddress().equals(request.getNewAddress().getAddress()) &&
+                user.getAddresses().stream().anyMatch(addr -> addr.getAddress().equals(request.getNewAddress().getAddress()))) {
+            throw new AppException(ErrorCode.INVALID_ADDRESS);
+        }
+
+        if (request.getNewAddress().isDefault()) {
+            user.getAddresses().forEach(addr -> addr.setDefault(false));
+        }
+
+        addressToUpdate.setAddress(request.getNewAddress().getAddress());
+        addressToUpdate.setDefault(request.getNewAddress().isDefault());
+        ensureSingleDefaultAddress(user.getAddresses());
+        user.getAddresses().size(); // Đánh dấu danh sách là "dirty"
+        user.setModifiedTime(LocalDateTime.now());
+        return userMapper.toUserResponse(userRepository.save(user));
+    }
+
+    @Transactional
+    @Override
+    public UserResponse removeAddress(AddressDeleteRequest request) {
+        log.info("Removing address {} for user {}", request.getAddress(), request.getUserId());
+
+        if (request.getAddress() == null || request.getAddress().trim().isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_ADDRESS);
+        }
+
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        boolean wasDefault = false;
+        Address addressToRemove = null;
+        for (Address addr : user.getAddresses()) {
+            if (addr.getAddress().equals(request.getAddress())) {
+                addressToRemove = addr;
+                wasDefault = addr.isDefault();
+                break;
+            }
+        }
+
+        if (addressToRemove == null) {
+            throw new AppException(ErrorCode.INVALID_ADDRESS);
+        }
+
+        user.getAddresses().remove(addressToRemove);
+
+        if (wasDefault && !user.getAddresses().isEmpty()) {
+            user.getAddresses().get(0).setDefault(true);
+        }
+
+        ensureSingleDefaultAddress(user.getAddresses());
+        user.getAddresses().size(); // Đánh dấu danh sách là "dirty"
+        user.setModifiedTime(LocalDateTime.now());
+        return userMapper.toUserResponse(userRepository.save(user));
+    }
+
+    @Transactional
+    @Override
+    public UserResponse setDefaultAddress(AddressDefaultRequest request) {
+        log.info("Setting default address {} for user {}", request.getAddress(), request.getUserId());
+        if (request.getAddress() == null || request.getAddress().trim().isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_ADDRESS);
+        }
+
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        Address addressToSetDefault = null;
+        for (Address addr : user.getAddresses()) {
+            if (addr.getAddress().equals(request.getAddress())) {
+                addressToSetDefault = addr;
+                break;
+            }
+        }
+
+        if (addressToSetDefault == null) {
+            throw new AppException(ErrorCode.INVALID_ADDRESS);
+        }
+
+        user.getAddresses().forEach(addr -> addr.setDefault(false));
+        addressToSetDefault.setDefault(true);
+
+        ensureSingleDefaultAddress(user.getAddresses());
+        user.getAddresses().size(); // Đánh dấu danh sách là "dirty"
+        user.setModifiedTime(LocalDateTime.now());
+        return userMapper.toUserResponse(userRepository.save(user));
+    }
+
+    private void validateAddress(Address address) {
+        if (address == null || address.getAddress() == null || address.getAddress().trim().isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_ADDRESS);
+        }
+        if (address.getAddress().length() > 255) {
+            throw new AppException(ErrorCode.INVALID_ADDRESS);
+        }
+    }
+
+    private void validateAddressList(List<Address> addresses) {
+        if (addresses != null && addresses.size() > 10) {
+            throw new AppException(ErrorCode.INVALID_ADDRESS);
+        }
+        if (addresses != null && !addresses.isEmpty()) {
+            long distinctAddresses = addresses.stream()
+                    .map(Address::getAddress)
+                    .distinct()
+                    .count();
+            if (distinctAddresses != addresses.size()) {
+                throw new AppException(ErrorCode.INVALID_ADDRESS);
+            }
+        }
+    }
+
+    private void ensureSingleDefaultAddress(List<Address> addresses) {
+        if (addresses == null || addresses.isEmpty()) {
+            return;
+        }
+
+        boolean hasDefault = false;
+        for (Address address : addresses) {
+            if (address.isDefault()) {
+                if (hasDefault) {
+                    address.setDefault(false);
+                } else {
+                    hasDefault = true;
+                }
+            }
+        }
+
+        if (!hasDefault && !addresses.isEmpty()) {
+            addresses.get(0).setDefault(true);
+        }
+    }
 }
