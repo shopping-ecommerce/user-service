@@ -17,7 +17,9 @@ public class SellerResponse {
     String userId;
     String shopName;
     String avatarLink;
+    String email;
     List<String> identificationLink;
     double wallet;
     LocalDateTime registrationDate;
+    String address;
 }

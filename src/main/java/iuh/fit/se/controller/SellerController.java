@@ -28,10 +28,12 @@ public class SellerController {
     public ApiResponse<SellerResponse> registrationSeller(@RequestPart("avatar")MultipartFile avatar,
                                                           @RequestPart("identifications") List<MultipartFile> identifications,
                                                           @RequestParam("userId") String userId,
-                                                          @RequestParam("shopName") String shopName) {
+                                                          @RequestParam("shopName") String shopName,
+                                                          @RequestParam("email") String email,
+                                                          @RequestParam("address") String address) {
         return ApiResponse.<SellerResponse>builder()
                 .code(200)
-                .result(sellerService.createSeller(avatar, identifications, userId, shopName))
+                .result(sellerService.createSeller(avatar, identifications, userId, shopName,email,address))
                 .build();
     }
 
@@ -72,6 +74,22 @@ public class SellerController {
         return ApiResponse.<SellerResponse>builder()
                 .code(200)
                 .result(sellerService.updateInfSeller(sellerId,  shopName,avatar))
+                .build();
+    }
+
+    @GetMapping("/searchByUserId/{userId}" )
+    public ApiResponse<SellerResponse> searchByUserId(@PathVariable("userId") String userId) {
+        return ApiResponse.<SellerResponse>builder()
+                .code(200)
+                .result(sellerService.searchByUserId(userId))
+                .build();
+    }
+
+    @GetMapping("/searchBySellerId/{sellerId}" )
+    public ApiResponse<SellerResponse> searchBySellerId(@PathVariable("sellerId") String sellerId) {
+        return ApiResponse.<SellerResponse>builder()
+                .code(200)
+                .result(sellerService.searchBySellerId(sellerId))
                 .build();
     }
 }
