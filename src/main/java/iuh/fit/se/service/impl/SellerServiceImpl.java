@@ -41,7 +41,7 @@ public class SellerServiceImpl implements SellerService {
     AuthClient authClient;
 
     @Override
-    public SellerResponse createSeller(MultipartFile avatar, List<MultipartFile> identifications, String userId, String shopName) {
+    public SellerResponse createSeller(MultipartFile avatar, List<MultipartFile> identifications, String userId, String shopName, String email, String address) {
         // 1. Kiểm tra User tồn tại
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
@@ -68,12 +68,16 @@ public class SellerServiceImpl implements SellerService {
             seller.setStatus(SellerStatusEnum.PENDING);
             seller.setRegistrationDate(LocalDateTime.now());
             seller.setModifiedTime(LocalDateTime.now());
+            seller.setEmail(email);
+            seller.setAddress(address);
         } else {
             // Tạo Seller mới nếu chưa có
             seller = Seller.builder()
                     .user(user)
                     .shopName(shopName)
                     .avatarLink(avatarURL)
+                    .email(email)
+                    .address(address)
                     .identificationLinks(identificationLinks)
                     .build();
         }
@@ -125,6 +129,13 @@ public class SellerServiceImpl implements SellerService {
         Seller seller = sellerRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.SELLER_NOT_FOUND));
         return sellerMapper.toSellerResponse(seller);
+    }
+
+    @Override
+    public SellerResponse searchBySellerId(String sellerId) {
+        return sellerRepository.findById(sellerId)
+                .map(seller -> sellerMapper.toSellerResponse(seller))
+                .orElseThrow(() -> new AppException(ErrorCode.SELLER_NOT_FOUND));
     }
 
     @Override

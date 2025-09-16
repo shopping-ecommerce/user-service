@@ -43,6 +43,8 @@ public class Seller {
     @Enumerated(EnumType.STRING)
     SellerStatusEnum status;
 
+    String email;
+
     LocalDateTime registrationDate;
 
     LocalDateTime createdTime;

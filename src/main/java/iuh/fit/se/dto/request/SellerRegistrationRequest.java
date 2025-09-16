@@ -1,6 +1,7 @@
 package iuh.fit.se.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
@@ -31,5 +32,9 @@ public class SellerRegistrationRequest {
     @JsonProperty("identificationLinks")
     List<String> identificationLinks;
 
+    @NotEmpty(message = "Address cannot be empty")
     String address;
+    @NotEmpty(message = "Phone number cannot be empty")
+    @Email(message = "Email should be valid")
+    String email;
 }
