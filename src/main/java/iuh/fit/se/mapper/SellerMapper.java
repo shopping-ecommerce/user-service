@@ -13,5 +13,6 @@ public interface SellerMapper {
     @Mapping(source = "id", target = "Id")
     @Mapping(source = "user.id", target = "userId")
     @Mapping(source = "identificationLinks", target = "identificationLink")
+    @Mapping(source = "status", target = "status")
     SellerResponse toSellerResponse(Seller seller);
 }
