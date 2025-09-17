@@ -1,5 +1,6 @@
 package iuh.fit.se.dto.response;
 
+import iuh.fit.se.enums.SellerStatusEnum;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -22,4 +23,5 @@ public class SellerResponse {
     double wallet;
     LocalDateTime registrationDate;
     String address;
+    SellerStatusEnum status;
 }
