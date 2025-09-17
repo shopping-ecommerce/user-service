@@ -1,6 +1,7 @@
 package iuh.fit.se.service.impl;
 
 import feign.FeignException;
+import iuh.fit.event.dto.SellerVerificationEvent;
 import iuh.fit.se.dto.request.AssignRoleRequest;
 import iuh.fit.se.dto.request.SellerRegistrationRequest;
 import iuh.fit.se.dto.request.SellerVerifyRequest;
@@ -22,6 +23,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -39,7 +41,7 @@ public class SellerServiceImpl implements SellerService {
     SellerMapper sellerMapper;
     FileClient fileClient;
     AuthClient authClient;
-
+    KafkaTemplate<String, Object> kafkaTemplate;
     @Override
     public SellerResponse createSeller(MultipartFile avatar, List<MultipartFile> identifications, String userId, String shopName, String email, String address) {
         // 1. Kiểm tra User tồn tại
@@ -120,7 +122,13 @@ public class SellerServiceImpl implements SellerService {
 
         // Update modification time
         seller.setModifiedTime(LocalDateTime.now());
-
+        kafkaTemplate.send("seller-verification", SellerVerificationEvent.builder()
+                .sellerId(seller.getId())
+                .sellerEmail(seller.getEmail()) // Assuming Seller has a User with email
+                .status(seller.getStatus().toString())
+                .reason(request.getReason()) // Optional rejection reason
+                .build()
+        );
         return sellerMapper.toSellerResponse(sellerRepository.save(seller));
     }
 
