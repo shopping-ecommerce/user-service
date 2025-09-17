@@ -15,4 +15,5 @@ public class SellerVerifyRequest {
     String sellerId;
     @JsonProperty("status")
     String status;
+    String reason;
 }

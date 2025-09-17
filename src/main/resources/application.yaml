@@ -17,6 +17,11 @@ spring:
     multipart:
       max-file-size: 50MB
       max-request-size: 100MB
+  kafka:
+    bootstrap-servers: ${DBKK_CONNECTION:kafka}:9094
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
   cloud:
     openfeign:
       client:
