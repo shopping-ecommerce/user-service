@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import iuh.fit.se.dto.request.*;
+import iuh.fit.se.dto.response.ProductResponse;
 import iuh.fit.se.dto.response.SellerResponse;
 import iuh.fit.se.service.SellerService;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -197,6 +198,40 @@ public class UserController {
     public ApiResponse<UserResponse> setDefaultAddress(@RequestBody AddressDefaultRequest request) {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.setDefaultAddress(request))
+                .build();
+    }
+
+
+    @PostMapping("/favorite/add")
+    public ApiResponse<UserResponse> addFavorite(@RequestBody FavoriteRequest request) {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.addFavoriteProduct(request))
+                .build();
+    }
+
+    /**
+     * Remove a product from user's favorites.
+     *
+     * @param request the favorite request containing user ID and product ID
+     * @return the updated user information
+     */
+    @PostMapping("/favorite/remove")
+    public ApiResponse<UserResponse> removeFavorite(@RequestBody FavoriteRequest request) {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.removeFavoriteProduct(request))
+                .build();
+    }
+
+    /**
+     * Get all favorite products for a user.
+     *
+     * @param userId the user ID to get favorite products for
+     * @return a list of favorite products
+     */
+    @GetMapping("/favorite/{userId}")
+    public ApiResponse<List<ProductResponse>> getFavoriteProducts(@PathVariable String userId) {
+        return ApiResponse.<List<ProductResponse>>builder()
+                .result(userService.getFavoriteProducts(userId))
                 .build();
     }
 }

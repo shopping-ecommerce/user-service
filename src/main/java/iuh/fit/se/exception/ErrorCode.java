@@ -77,7 +77,12 @@ public enum ErrorCode {
     SESSION_EXPIRED(1043, "Session expired", HttpStatus.UNAUTHORIZED),
     TOKEN_EXPIRED(1044, "Token expired", HttpStatus.UNAUTHORIZED),
     REFRESH_TOKEN_INVALID(1045, "Refresh token invalid", HttpStatus.UNAUTHORIZED),
-    INVALID_ADDRESS(1046, "Invalid address format", HttpStatus.BAD_REQUEST),;
+    INVALID_ADDRESS(1046, "Invalid address format", HttpStatus.BAD_REQUEST),
+    PRODUCT_NOT_FOUND(1047,"Product not found",HttpStatus.NOT_FOUND),
+    PRODUCT_NOT_ACTIVE(1048,"Product is not active",HttpStatus.BAD_REQUEST),
+    PRODUCT_ALREADY_IN_FAVORITES(1049,"Product already in favorites",HttpStatus.BAD_REQUEST),
+    PRODUCT_NOT_IN_FAVORITES(1050,"Product not in favorites",HttpStatus.BAD_REQUEST),
+    PRODUCT_SERVICE_ERROR(1051,"Product service error",HttpStatus.BAD_GATEWAY),;
 
     int code;
     String message;

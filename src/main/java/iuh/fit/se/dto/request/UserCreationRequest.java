@@ -8,8 +8,8 @@ import jakarta.validation.constraints.Pattern;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import iuh.fit.se.enums.UserStatusEnum;
-import iuh.fit.se.enums.UserTierEnum;
+import iuh.fit.se.entity.enums.UserStatusEnum;
+import iuh.fit.se.entity.enums.UserTierEnum;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

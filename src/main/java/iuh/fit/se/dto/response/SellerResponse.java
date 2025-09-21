@@ -1,6 +1,6 @@
 package iuh.fit.se.dto.response;
 
-import iuh.fit.se.enums.SellerStatusEnum;
+import iuh.fit.se.entity.enums.SellerStatusEnum;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -14,7 +14,7 @@ import java.util.List;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SellerResponse {
-    String Id;
+    String id;
     String userId;
     String shopName;
     String avatarLink;

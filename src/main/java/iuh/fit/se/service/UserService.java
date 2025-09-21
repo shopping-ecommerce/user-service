@@ -3,6 +3,7 @@ package iuh.fit.se.service;
 import java.util.List;
 
 import iuh.fit.se.dto.request.*;
+import iuh.fit.se.dto.response.ProductResponse;
 import iuh.fit.se.dto.response.UserResponse;
 import iuh.fit.se.entity.Address;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,4 +37,9 @@ public interface UserService {
     UserResponse updateAddress(AddressUpdateRequest request);
     UserResponse removeAddress(AddressDeleteRequest request);
     UserResponse setDefaultAddress(AddressDefaultRequest request);
+
+    UserResponse addFavoriteProduct(FavoriteRequest request);
+    UserResponse removeFavoriteProduct(FavoriteRequest request);
+
+    List<ProductResponse> getFavoriteProducts(String userId);
 }

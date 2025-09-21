@@ -1,4 +1,4 @@
-package iuh.fit.se.enums;
+package iuh.fit.se.entity.enums;
 
 public enum SellerStatusEnum {
     PENDING,
