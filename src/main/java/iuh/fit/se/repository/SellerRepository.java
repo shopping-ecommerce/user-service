@@ -1,7 +1,7 @@
 package iuh.fit.se.repository;
 
 import iuh.fit.se.entity.Seller;
-import iuh.fit.se.enums.SellerStatusEnum;
+import iuh.fit.se.entity.enums.SellerStatusEnum;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

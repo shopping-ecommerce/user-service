@@ -1,10 +1,6 @@
 package iuh.fit.se.dto.request;
 
-import java.time.LocalDateTime;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
-import iuh.fit.se.enums.UserStatusEnum;
-import iuh.fit.se.enums.UserTierEnum;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;

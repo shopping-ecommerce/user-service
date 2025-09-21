@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final String[] PULIC_ENDPOINTS = {"/profiles/create",
+            "/sellers/searchByUserId/**",
+            "/sellers/searchBySellerId/**",
     };
 
     private CustomJwtDecoder customJwtDecoder;

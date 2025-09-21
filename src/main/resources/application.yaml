@@ -37,6 +37,10 @@ spring:
                 url: ${FEIGN_AUTH:http://auth-service:8080/authentication}
                 connect-timeout: 30000
                 read-timeout: 60000
+            product-service:
+                url: ${FEIGN_PRODUCT:http://product-service:8083/product}
+                connect-timeout: 30000
+                read-timeout: 60000
 jwt:
   signerKey: ${JWT_SIGNERKEY:"1TjXchw5FloESb63Kc+DFhTARvpWL4jUGCwfGWxuG5SIf/1y/LgJxHnMqaF6A/ij"}
 

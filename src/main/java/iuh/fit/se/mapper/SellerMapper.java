@@ -10,7 +10,6 @@ import org.mapstruct.Mapping;
 public interface SellerMapper {
 
     Seller toSeller(SellerRegistrationRequest request);
-    @Mapping(source = "id", target = "Id")
     @Mapping(source = "user.id", target = "userId")
     @Mapping(source = "identificationLinks", target = "identificationLink")
     @Mapping(source = "status", target = "status")

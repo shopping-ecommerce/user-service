@@ -6,8 +6,8 @@ import java.util.List;
 
 import jakarta.persistence.*;
 
-import iuh.fit.se.enums.UserStatusEnum;
-import iuh.fit.se.enums.UserTierEnum;
+import iuh.fit.se.entity.enums.UserStatusEnum;
+import iuh.fit.se.entity.enums.UserTierEnum;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -40,6 +40,13 @@ public class User {
     @ElementCollection
     @CollectionTable(name = "user_addresses", joinColumns = @JoinColumn(name = "user_id"))
     List<Address> addresses = new ArrayList<>(); // Sử dụng List<Address>
+
+    @ElementCollection
+    @CollectionTable(name = "user_favorites", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "product_id")
+    List<String> favoriteProducts = new ArrayList<>(); // Danh sách product_id của sản phẩm yêu thích
+
+    @Enumerated(EnumType.STRING)
     UserStatusEnum status;
 
     @Column(name = "created_time")
@@ -63,6 +70,7 @@ public class User {
         this.modifiedTime = LocalDateTime.now();
         this.birthdate = "01-01-2000";
         this.addresses = new ArrayList<>();
+        this.favoriteProducts = new ArrayList<>();
     }
 
     @PreUpdate

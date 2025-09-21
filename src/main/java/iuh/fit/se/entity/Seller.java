@@ -2,7 +2,7 @@ package iuh.fit.se.entity;
 
 import java.time.LocalDateTime;
 
-import iuh.fit.se.enums.SellerStatusEnum;
+import iuh.fit.se.entity.enums.SellerStatusEnum;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
