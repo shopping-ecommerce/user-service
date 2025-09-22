@@ -30,4 +30,5 @@ public class UserResponse {
     LocalDateTime modifiedTime;
     String birthdate;
     String publicId;
+    String phone;
 }

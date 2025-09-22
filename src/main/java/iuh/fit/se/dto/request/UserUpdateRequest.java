@@ -21,4 +21,6 @@ public class UserUpdateRequest {
     String lastName;
     @JsonProperty("birthdate")
     String birthdate;
+    @JsonProperty("phone")
+    String phone;
 }
