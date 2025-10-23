@@ -111,7 +111,7 @@ public class SellerController {
                 .build();
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('UPDATE_SELLER')")
     @DeleteMapping("/deleteSeller")
     public ApiResponse<Void> deleteSeller(@RequestParam("sellerId") String sellerId, @RequestParam("reason") String reason) {
         sellerService.deleteSeller(sellerId,reason);
