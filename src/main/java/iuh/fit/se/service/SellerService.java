@@ -16,4 +16,8 @@ public interface SellerService {
 
     SellerResponse updateInfSeller(String sellerId,String shopName,MultipartFile avatar);
     List<SellerResponse> searchSellerPending();
+
+    List<SellerResponse> getAllSellers();
+
+    void deleteSellers(List<String> sellerIds);
 }

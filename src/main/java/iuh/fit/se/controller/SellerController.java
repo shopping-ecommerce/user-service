@@ -92,4 +92,22 @@ public class SellerController {
                 .result(sellerService.searchBySellerId(sellerId))
                 .build();
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("")
+    public ApiResponse<List<SellerResponse>> getAllSellers() {
+        return ApiResponse.<List<SellerResponse>>builder()
+                .code(200)
+                .result(sellerService.getAllSellers())
+                .build();
+    }
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("")
+    public ApiResponse<Void> deleteSellers(@RequestBody List<String> sellerIds) {
+        sellerService.deleteSellers(sellerIds);
+        return ApiResponse.<Void>builder()
+                .code(200)
+                .message("Đã cập nhật trạng thái REJECTED cho " + (sellerIds == null ? 0 : sellerIds.size()) + " seller")
+                .build();
+    }
 }

@@ -119,6 +119,7 @@ public class UserController {
      * @param requestBody a map containing a list of user IDs to delete
      * @return a confirmation message
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping
     public ApiResponse<String> deleteUsers(@RequestBody Map<String, List<String>> requestBody) {
         List<String> ids = requestBody.get("ids");
