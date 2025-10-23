@@ -273,6 +273,13 @@ public class SellerServiceImpl implements SellerService {
             String userId = user.getAccountId();
             log.info("Revoking SELLER role for userId: {}", userId);
             try {
+                productClient.deleteProducts(sellerId, reason);
+            } catch (FeignException e){
+                log.error("Error deleting products for sellerId {}: status={}, body={}",
+                        sellerId, e.status(), e.contentUTF8());
+                throw new AppException(ErrorCode.SELLER_NOT_FOUND);
+            }
+            try {
                 authClient.revokeRoleFromUser(
                         RevokeRoleRequest.builder()
                                 .userId(userId)
@@ -283,13 +290,7 @@ public class SellerServiceImpl implements SellerService {
                         userId, e.status(), e.contentUTF8());
                 throw new AppException(ErrorCode.USER_NOT_FOUND);
             }
-            try {
-                productClient.deleteProducts(sellerId, reason);
-            } catch (FeignException e){
-              log.error("Error deleting products for sellerId {}: status={}, body={}",
-                        sellerId, e.status(), e.contentUTF8());
-              throw new AppException(ErrorCode.SELLER_NOT_FOUND);
-            }
+
         }
     }
 
