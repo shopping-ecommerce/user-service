@@ -3,6 +3,7 @@ package iuh.fit.se.service.impl;
 import feign.FeignException;
 import iuh.fit.event.dto.SellerVerificationEvent;
 import iuh.fit.se.dto.request.AssignRoleRequest;
+import iuh.fit.se.dto.request.DeleteRequest;
 import iuh.fit.se.dto.request.SellerVerifyRequest;
 import iuh.fit.se.dto.response.AuthClientResponse;
 import iuh.fit.se.dto.response.FileClientResponse;
@@ -24,11 +25,15 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE,makeFinal = true)
@@ -88,7 +93,7 @@ public class SellerServiceImpl implements SellerService {
     @Override
     public SellerResponse verifySeller(SellerVerifyRequest request) {
         Seller seller = sellerRepository.findById(request.getSellerId())
-                .orElseThrow(()-> new AppException(ErrorCode.SELLER_NOT_FOUND)); // Changed from USER_NOT_FOUND
+                .orElseThrow(() -> new AppException(ErrorCode.SELLER_NOT_FOUND)); // Changed from USER_NOT_FOUND
 
         // Set seller status
         seller.setStatus(request.getStatus().toUpperCase().equalsIgnoreCase(SellerStatusEnum.APPROVED.toString())
@@ -118,17 +123,29 @@ public class SellerServiceImpl implements SellerService {
         } else {
             log.info("Seller rejected, no role assignment needed for user: {}", seller.getUser().getAccountId());
         }
-
+        List<String> ids = Optional.ofNullable(seller.getIdentificationLinks())
+                .map(ArrayList::new)           // copy sang list mutable
+                .orElseGet(ArrayList::new);
         // Update modification time
-        seller.setModifiedTime(LocalDateTime.now());
-        kafkaTemplate.send("seller-verification", SellerVerificationEvent.builder()
-                .sellerId(seller.getId())
-                .sellerEmail(seller.getEmail()) // Assuming Seller has a User with email
-                .status(seller.getStatus().toString())
-                .reason(request.getReason()) // Optional rejection reason
-                .build()
-        );
-        return sellerMapper.toSellerResponse(sellerRepository.save(seller));
+        if (!ids.isEmpty()) {
+            try {
+                fileClient.deleteByUrl(DeleteRequest.builder().urls(ids).build());
+                // Sau khi xóa thành công, set list rỗng nhưng MUTABLE
+                seller.setIdentificationLinks(new ArrayList<>());
+            } catch (FeignException e) {
+                log.error("Delete identifications failed: status={}, body={}", e.status(), e.contentUTF8());
+                throw new AppException(ErrorCode.FILE_DELETE_FAILED);
+            }
+        }
+            seller.setModifiedTime(LocalDateTime.now());
+            kafkaTemplate.send("seller-verification", SellerVerificationEvent.builder()
+                    .sellerId(seller.getId())
+                    .sellerEmail(seller.getEmail()) // Assuming Seller has a User with email
+                    .status(seller.getStatus().toString())
+                    .reason(request.getReason()) // Optional rejection reason
+                    .build()
+            );
+            return sellerMapper.toSellerResponse(sellerRepository.save(seller));
     }
 
     @Override
@@ -182,4 +199,44 @@ public class SellerServiceImpl implements SellerService {
                 .map(seller -> sellerMapper.toSellerResponse(seller))
                 .toList();
     }
+
+    @Override
+    public List<SellerResponse> getAllSellers() {
+        return sellerRepository.findAll()
+                .stream()
+                .map(sellerMapper::toSellerResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public void deleteSellers(List<String> sellerIds) {
+        // Không làm gì nếu danh sách rỗng/null
+        if (sellerIds == null || sellerIds.isEmpty()) {
+            return;
+        }
+
+        // Tìm tất cả seller theo danh sách id
+        List<Seller> sellers = sellerRepository.findAllById(sellerIds);
+
+        // Kiểm tra thiếu ID nào không
+        if (sellers.size() != sellerIds.size()) {
+            // Liệt kê các id không tồn tại để báo lỗi rõ ràng
+            Set<String> foundIds = sellers.stream()
+                    .map(Seller::getId)
+                    .collect(Collectors.toSet());
+            List<String> notFound = sellerIds.stream()
+                    .filter(id -> !foundIds.contains(id))
+                    .toList();
+
+            throw new AppException(ErrorCode.SELLER_NOT_FOUND);
+        }
+
+        // Đánh dấu REJECTED cho tất cả seller cần xoá
+        sellers.forEach(s -> s.setStatus(SellerStatusEnum.REJECTED));
+
+        // Lưu lại
+        sellerRepository.saveAll(sellers);
+    }
+
 }

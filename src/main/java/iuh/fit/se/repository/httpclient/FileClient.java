@@ -4,10 +4,15 @@ import feign.Logger;
 import feign.Retryer;
 import feign.codec.Encoder;
 import iuh.fit.se.config.AuthenticationRequestInterceptor;
+import iuh.fit.se.dto.request.DeleteRequest;
 import iuh.fit.se.dto.response.FileClientResponse;
+import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.cloud.openfeign.support.SpringEncoder;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 import feign.form.spring.SpringFormEncoder;
@@ -21,11 +26,14 @@ public interface FileClient {
     @PostMapping(value = "/s3/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     FileClientResponse uploadFile(@RequestPart("files") List<MultipartFile> files);
 
+    @PostMapping(value = "/s3/delete", consumes = MediaType.APPLICATION_JSON_VALUE)
+    FileClientResponse deleteByUrl(@RequestBody DeleteRequest deleteRequest);
     @Configuration
     class FormConfig {
         @Bean
-        public Encoder feignFormEncoder() {
-            return new SpringFormEncoder();
+        public Encoder feignFormEncoder(
+                ObjectFactory<HttpMessageConverters> messageConverters) {
+            return new SpringFormEncoder(new SpringEncoder(messageConverters));
         }
     }
 
