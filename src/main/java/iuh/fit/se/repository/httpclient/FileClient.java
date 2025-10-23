@@ -6,7 +6,10 @@ import feign.codec.Encoder;
 import iuh.fit.se.config.AuthenticationRequestInterceptor;
 import iuh.fit.se.dto.request.DeleteRequest;
 import iuh.fit.se.dto.response.FileClientResponse;
+import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.cloud.openfeign.support.SpringEncoder;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,8 +31,9 @@ public interface FileClient {
     @Configuration
     class FormConfig {
         @Bean
-        public Encoder feignFormEncoder() {
-            return new SpringFormEncoder();
+        public Encoder feignFormEncoder(
+                ObjectFactory<HttpMessageConverters> messageConverters) {
+            return new SpringFormEncoder(new SpringEncoder(messageConverters));
         }
     }
 

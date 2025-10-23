@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -92,7 +93,7 @@ public class SellerServiceImpl implements SellerService {
     @Override
     public SellerResponse verifySeller(SellerVerifyRequest request) {
         Seller seller = sellerRepository.findById(request.getSellerId())
-                .orElseThrow(()-> new AppException(ErrorCode.SELLER_NOT_FOUND)); // Changed from USER_NOT_FOUND
+                .orElseThrow(() -> new AppException(ErrorCode.SELLER_NOT_FOUND)); // Changed from USER_NOT_FOUND
 
         // Set seller status
         seller.setStatus(request.getStatus().toUpperCase().equalsIgnoreCase(SellerStatusEnum.APPROVED.toString())
@@ -122,25 +123,29 @@ public class SellerServiceImpl implements SellerService {
         } else {
             log.info("Seller rejected, no role assignment needed for user: {}", seller.getUser().getAccountId());
         }
-
+        List<String> ids = Optional.ofNullable(seller.getIdentificationLinks())
+                .map(ArrayList::new)           // copy sang list mutable
+                .orElseGet(ArrayList::new);
         // Update modification time
-        seller.setModifiedTime(LocalDateTime.now());
-        try {
-            FileClientResponse clientResponse = fileClient.deleteByUrl(DeleteRequest.builder()
-                    .urls(seller.getIdentificationLinks())
-                    .build());
-            seller.setIdentificationLinks(List.of());
-        }   catch (FeignException e){
-            throw new AppException(ErrorCode.FILE_DELETE_FAILED);
+        if (!ids.isEmpty()) {
+            try {
+                fileClient.deleteByUrl(DeleteRequest.builder().urls(ids).build());
+                // Sau khi xóa thành công, set list rỗng nhưng MUTABLE
+                seller.setIdentificationLinks(new ArrayList<>());
+            } catch (FeignException e) {
+                log.error("Delete identifications failed: status={}, body={}", e.status(), e.contentUTF8());
+                throw new AppException(ErrorCode.FILE_DELETE_FAILED);
+            }
         }
-        kafkaTemplate.send("seller-verification", SellerVerificationEvent.builder()
-                .sellerId(seller.getId())
-                .sellerEmail(seller.getEmail()) // Assuming Seller has a User with email
-                .status(seller.getStatus().toString())
-                .reason(request.getReason()) // Optional rejection reason
-                .build()
-        );
-        return sellerMapper.toSellerResponse(sellerRepository.save(seller));
+            seller.setModifiedTime(LocalDateTime.now());
+            kafkaTemplate.send("seller-verification", SellerVerificationEvent.builder()
+                    .sellerId(seller.getId())
+                    .sellerEmail(seller.getEmail()) // Assuming Seller has a User with email
+                    .status(seller.getStatus().toString())
+                    .reason(request.getReason()) // Optional rejection reason
+                    .build()
+            );
+            return sellerMapper.toSellerResponse(sellerRepository.save(seller));
     }
 
     @Override
