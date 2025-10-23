@@ -3,6 +3,7 @@ package iuh.fit.se.service;
 import iuh.fit.se.dto.request.SellerRegistrationRequest;
 import iuh.fit.se.dto.request.SellerVerifyRequest;
 import iuh.fit.se.dto.response.SellerResponse;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -20,4 +21,7 @@ public interface SellerService {
     List<SellerResponse> getAllSellers();
 
     void deleteSellers(List<String> sellerIds);
+
+    @Transactional
+    void deleteSeller(String sellerId, String reason);
 }

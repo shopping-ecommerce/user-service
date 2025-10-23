@@ -4,6 +4,7 @@ import feign.FeignException;
 import iuh.fit.event.dto.SellerVerificationEvent;
 import iuh.fit.se.dto.request.AssignRoleRequest;
 import iuh.fit.se.dto.request.DeleteRequest;
+import iuh.fit.se.dto.request.RevokeRoleRequest;
 import iuh.fit.se.dto.request.SellerVerifyRequest;
 import iuh.fit.se.dto.response.AuthClientResponse;
 import iuh.fit.se.dto.response.FileClientResponse;
@@ -18,6 +19,7 @@ import iuh.fit.se.repository.SellerRepository;
 import iuh.fit.se.repository.UserRepository;
 import iuh.fit.se.repository.httpclient.AuthClient;
 import iuh.fit.se.repository.httpclient.FileClient;
+import iuh.fit.se.repository.httpclient.ProductClient;
 import iuh.fit.se.service.SellerService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -29,10 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,6 +43,7 @@ public class SellerServiceImpl implements SellerService {
     SellerRepository sellerRepository;
     SellerMapper sellerMapper;
     FileClient fileClient;
+    ProductClient productClient;
     AuthClient authClient;
     KafkaTemplate<String, Object> kafkaTemplate;
     @Override
@@ -211,32 +211,86 @@ public class SellerServiceImpl implements SellerService {
     @Override
     @Transactional
     public void deleteSellers(List<String> sellerIds) {
-        // Không làm gì nếu danh sách rỗng/null
-        if (sellerIds == null || sellerIds.isEmpty()) {
-            return;
-        }
+        // 1) Không làm gì nếu danh sách rỗng/null
+        if (sellerIds == null || sellerIds.isEmpty()) return;
 
-        // Tìm tất cả seller theo danh sách id
+        // 2) Tìm tất cả seller theo danh sách id
         List<Seller> sellers = sellerRepository.findAllById(sellerIds);
 
-        // Kiểm tra thiếu ID nào không
+        // 3) Kiểm tra thiếu ID nào không
         if (sellers.size() != sellerIds.size()) {
-            // Liệt kê các id không tồn tại để báo lỗi rõ ràng
-            Set<String> foundIds = sellers.stream()
-                    .map(Seller::getId)
-                    .collect(Collectors.toSet());
+            Set<String> foundIds = sellers.stream().map(Seller::getId).collect(Collectors.toSet());
             List<String> notFound = sellerIds.stream()
                     .filter(id -> !foundIds.contains(id))
                     .toList();
-
+            // Nếu bạn có ErrorCode nhận tham số, có thể truyền danh sách notFound cho rõ ràng
             throw new AppException(ErrorCode.SELLER_NOT_FOUND);
         }
 
-        // Đánh dấu REJECTED cho tất cả seller cần xoá
+        // 4) Đánh dấu REJECTED cho tất cả seller cần xoá
         sellers.forEach(s -> s.setStatus(SellerStatusEnum.REJECTED));
-
-        // Lưu lại
         sellerRepository.saveAll(sellers);
+
+        // 5) Thu hồi quyền SELLER cho các user liên quan (loại trùng)
+        Set<String> userIds = sellers.stream()
+                .map(Seller::getUser)          // Seller -> User
+                .filter(Objects::nonNull)      // phòng NPE
+                .map(User::getAccountId)              // User -> String (userId)
+                .filter(Objects::nonNull)      // phòng user chưa có id
+                .collect(Collectors.toSet());
+
+
+        for (String uid : userIds) {
+            log.info("Revoking SELLER role for userId: {}", uid);
+            try {
+                authClient.revokeRoleFromUser(
+                        RevokeRoleRequest.builder()
+                                .userId(uid)
+                                .build()
+                );
+            } catch (FeignException e){
+                log.error("Error revoking SELLER role for userId {}: status={}, body={}",
+                        uid, e.status(), e.contentUTF8());
+                throw new AppException(ErrorCode.USER_NOT_FOUND);
+            }
+        }
+    }
+
+    @Override
+    @Transactional
+    public void deleteSeller(String sellerId, String reason) {
+        // 1) Find the seller by ID
+        Seller seller = sellerRepository.findById(sellerId)
+                .orElseThrow(() -> new AppException(ErrorCode.SELLER_NOT_FOUND));
+
+        // 2) Mark the seller as REJECTED
+        seller.setStatus(SellerStatusEnum.REJECTED);
+        sellerRepository.save(seller);
+
+        // 3) Revoke the SELLER role for the associated user
+        User user = seller.getUser();
+        if (user != null && user.getAccountId() != null) {
+            String userId = user.getAccountId();
+            log.info("Revoking SELLER role for userId: {}", userId);
+            try {
+                authClient.revokeRoleFromUser(
+                        RevokeRoleRequest.builder()
+                                .userId(userId)
+                                .build()
+                );
+            } catch (FeignException e) {
+                log.error("Error revoking SELLER role for userId {}: status={}, body={}",
+                        userId, e.status(), e.contentUTF8());
+                throw new AppException(ErrorCode.USER_NOT_FOUND);
+            }
+            try {
+                productClient.deleteProducts(sellerId, reason);
+            } catch (FeignException e){
+              log.error("Error deleting products for sellerId {}: status={}, body={}",
+                        sellerId, e.status(), e.contentUTF8());
+              throw new AppException(ErrorCode.SELLER_NOT_FOUND);
+            }
+        }
     }
 
 }
