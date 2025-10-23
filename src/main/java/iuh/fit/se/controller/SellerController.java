@@ -102,12 +102,22 @@ public class SellerController {
                 .build();
     }
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("")
+    @DeleteMapping("/deleteSellers")
     public ApiResponse<Void> deleteSellers(@RequestBody List<String> sellerIds) {
         sellerService.deleteSellers(sellerIds);
         return ApiResponse.<Void>builder()
                 .code(200)
                 .message("Đã cập nhật trạng thái REJECTED cho " + (sellerIds == null ? 0 : sellerIds.size()) + " seller")
+                .build();
+    }
+
+    @PreAuthorize("hasAuthority('UPDATE_SELLER')")
+    @DeleteMapping("/deleteSeller")
+    public ApiResponse<Void> deleteSeller(@RequestParam("sellerId") String sellerId, @RequestParam("reason") String reason) {
+        sellerService.deleteSeller(sellerId,reason);
+        return ApiResponse.<Void>builder()
+                .code(200)
+                .message("Đã xóa Seller " + sellerId  + " seller")
                 .build();
     }
 }
