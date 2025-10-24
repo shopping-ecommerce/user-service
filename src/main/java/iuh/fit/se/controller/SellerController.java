@@ -70,10 +70,12 @@ public class SellerController {
     @PostMapping("/updateInfSeller")
     public ApiResponse<SellerResponse> updateInfSeller(@RequestPart("avatar") MultipartFile avatar,
                                                        @RequestParam("sellerId") String sellerId,
-                                                       @RequestParam("shopName") String shopName) {
+                                                       @RequestParam("shopName") String shopName,
+                                                       @RequestParam("address") String address,
+                                                       @RequestParam("email") String email) {
         return ApiResponse.<SellerResponse>builder()
                 .code(200)
-                .result(sellerService.updateInfSeller(sellerId,  shopName,avatar))
+                .result(sellerService.updateInfSeller(sellerId,  shopName,avatar, address,email))
                 .build();
     }
 

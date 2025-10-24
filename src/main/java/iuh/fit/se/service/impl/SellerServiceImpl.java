@@ -163,7 +163,7 @@ public class SellerServiceImpl implements SellerService {
     }
 
     @Override
-    public SellerResponse updateInfSeller(String sellerId,String shopName, MultipartFile avatar) {
+    public SellerResponse updateInfSeller(String sellerId,String shopName, MultipartFile avatar,String address, String email) {
         Seller seller = sellerRepository.findById(sellerId).orElseThrow(()-> new AppException(ErrorCode.SELLER_NOT_FOUND));
         boolean shouldUpdate = false;
 
@@ -181,6 +181,15 @@ public class SellerServiceImpl implements SellerService {
         // Kiểm tra và cập nhật shopName nếu có thay đổi
         if (shopName != null && !shopName.trim().isEmpty() && !shopName.trim().equals(seller.getShopName())) {
             seller.setShopName(shopName.trim());
+            shouldUpdate = true;
+        }
+        if(address != null && !address.trim().isEmpty() && !address.trim().equals(seller.getAddress())){
+            seller.setAddress(address.trim());
+            shouldUpdate = true;
+        }
+
+        if(email != null && !email.trim().isEmpty() && !email.trim().equals(seller.getEmail())){
+            seller.setEmail(email.trim());
             shouldUpdate = true;
         }
 
