@@ -15,7 +15,7 @@ public interface SellerService {
     SellerResponse searchByUserId(String userId);
     SellerResponse searchBySellerId(String sellerId);
 
-    SellerResponse updateInfSeller(String sellerId,String shopName,MultipartFile avatar);
+    SellerResponse updateInfSeller(String sellerId,String shopName,MultipartFile avatar,String address,String email);
     List<SellerResponse> searchSellerPending();
 
     List<SellerResponse> getAllSellers();
