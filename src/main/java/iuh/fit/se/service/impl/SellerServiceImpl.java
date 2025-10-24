@@ -170,6 +170,12 @@ public class SellerServiceImpl implements SellerService {
         // Kiểm tra và cập nhật avatar nếu có thay đổi
         if (avatar != null && !avatar.isEmpty()) {
             try {
+                fileClient.deleteByUrl(DeleteRequest.builder().urls(List.of(seller.getAvatarLink())).build());
+            } catch (FeignException e) {
+                log.error("Delete identifications failed: status={}, body={}", e.status(), e.contentUTF8());
+                throw new AppException(ErrorCode.FILE_DELETE_FAILED);
+            }
+            try {
                 FileClientResponse fileClientResponse = fileClient.uploadFile(List.of(avatar));
                 seller.setAvatarLink(fileClientResponse.getResult().get(0));
                 shouldUpdate = true;

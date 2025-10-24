@@ -198,6 +198,12 @@ public class UserServiceImpl implements UserService {
             log.info("Gửi yêu cầu tải lên tệp {} đến File Service", file.getOriginalFilename());
             FileClientResponse fileClientResponse = fileClient.uploadFile(List.of(file));
             log.info("Phản hồi từ File Service: {}", fileClientResponse.getMessage());
+            try {
+                fileClient.deleteByUrl(DeleteRequest.builder().urls(List.of(user.getPublicId())).build());
+            } catch (FeignException e) {
+                log.error("Delete identifications failed: status={}, body={}", e.status(), e.contentUTF8());
+                throw new AppException(ErrorCode.FILE_DELETE_FAILED);
+            }
             user.setPublicId(fileClientResponse.getResult().get(0));
             return userMapper.toUserResponse(userRepository.save(user));
         } catch (FeignException e) {
