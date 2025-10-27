@@ -363,25 +363,39 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse addFavoriteProduct(FavoriteRequest request) {
+        log.debug("=== START addFavoriteProduct ===");
         log.info("Adding favorite product {} for user {}", request.getProductId(), request.getUserId());
 
         // Validation
         if (request.getUserId() == null || request.getUserId().trim().isEmpty()) {
+            log.warn("Invalid userId: {}", request.getUserId());
             throw new AppException(ErrorCode.USER_NOT_FOUND);
         }
         if (request.getProductId() == null || request.getProductId().trim().isEmpty()) {
+            log.warn("Invalid productId: {}", request.getProductId());
             throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
         }
 
         // Tìm user theo userId
+        log.debug("Searching user by ID: {}", request.getUserId());
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.error("User not found for ID: {}", request.getUserId());
+                    return new AppException(ErrorCode.USER_NOT_FOUND);
+                });
+        log.debug("Found user: {} with {} favorite products", user.getId(),
+                (user.getFavoriteProducts() != null ? user.getFavoriteProducts().size() : 0));
 
         try {
             // Kiểm tra sản phẩm có tồn tại và hợp lệ không
+            log.debug("Calling productClient.searchById({})", request.getProductId());
             ApiResponse<ProductResponse> productResponse = productClient.searchById(request.getProductId());
+            log.debug("Product response received: status={}, result={}",
+                    productResponse != null ? productResponse.getResult().getStatus() : "null",
+                    productResponse != null ? productResponse.getResult() : "null");
 
             if (productResponse == null || productResponse.getResult() == null) {
+                log.error("Product response is null/empty for ID: {}", request.getProductId());
                 throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
             }
 
@@ -389,34 +403,42 @@ public class UserServiceImpl implements UserService {
 
             // Kiểm tra trạng thái sản phẩm
             if (product.getStatus() != Status.AVAILABLE) {
+                log.warn("Product {} is not available (status: {})", request.getProductId(), product.getStatus());
                 throw new AppException(ErrorCode.PRODUCT_NOT_ACTIVE);
             }
 
             // Initialize favoriteProducts list if null
             if (user.getFavoriteProducts() == null) {
                 user.setFavoriteProducts(new ArrayList<>());
+                log.debug("Initialized empty favoriteProducts list for user {}", user.getId());
             }
 
             // Kiểm tra sản phẩm đã tồn tại trong danh sách yêu thích chưa
             if (user.getFavoriteProducts().contains(request.getProductId())) {
+                log.warn("Product {} already in favorites for user {}", request.getProductId(), user.getId());
                 throw new AppException(ErrorCode.PRODUCT_ALREADY_IN_FAVORITES);
             }
 
             // Thêm sản phẩm vào danh sách yêu thích
             user.getFavoriteProducts().add(request.getProductId());
             user.setModifiedTime(LocalDateTime.now());
+            log.debug("Added product {} to favorites. New size: {}", request.getProductId(), user.getFavoriteProducts().size());
 
             // Lưu thay đổi
+            log.debug("Saving updated user to DB");
             User savedUser = userRepository.save(user);
             log.info("Successfully added product {} to favorites for user {}", request.getProductId(), request.getUserId());
 
+            log.debug("=== END addFavoriteProduct ===");
             return userMapper.toUserResponse(savedUser);
 
         } catch (FeignException e) {
-            log.error("Error calling Product Service for productId {}: {}", request.getProductId(), e.getMessage(), e);
+            log.error("FeignException when calling Product Service - Status: {}, Body: {}, for productId: {}",
+                    e.status(), e.contentUTF8(), request.getProductId(), e);
             throw new AppException(ErrorCode.PRODUCT_SERVICE_ERROR);
         } catch (Exception e) {
-            log.error("Unexpected error when adding favorite product: {}", e.getMessage(), e);
+            log.error("Unexpected error when adding favorite product for user {} and product {}: {}",
+                    request.getUserId(), request.getProductId(), e.getMessage(), e);
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
     }
