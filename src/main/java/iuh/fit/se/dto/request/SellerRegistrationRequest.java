@@ -32,13 +32,9 @@ public class SellerRegistrationRequest {
     @JsonProperty("identificationLinks")
     List<String> identificationLinks;
 
-<<<<<<< Updated upstream
     @NotEmpty(message = "Address cannot be empty")
     String address;
-    @NotEmpty(message = "Phone number cannot be empty")
+    @NotEmpty(message = "Email cannot be empty")
     @Email(message = "Email should be valid")
     String email;
-=======
-    String address;
->>>>>>> Stashed changes
 }
