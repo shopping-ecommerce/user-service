@@ -5,10 +5,10 @@ server:
 
 spring:
   datasource:
-    url: ${DBMS_CONNECTION:jdbc:mariadb://mariadb:3306/user_db}
+    url: ${DBMS_CONNECTION:}
     driver-class-name: "org.mariadb.jdbc.Driver"
-    username: ${DBMS_USERNAME:root}
-    password: ${DBMS_PASSWORD:sapassword}
+    username: ${DBMS_USERNAME:}
+    password: ${DBMS_PASSWORD:}
   jpa:
     hibernate:
       ddl-auto: update
@@ -18,7 +18,7 @@ spring:
       max-file-size: 50MB
       max-request-size: 100MB
   kafka:
-    bootstrap-servers: ${DBKK_CONNECTION:kafka}:9094
+    bootstrap-servers: ${DBKK_CONNECTION:}:9094
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -30,19 +30,19 @@ spring:
               connect-timeout: 60000
               read-timeout: 120000
             file-service:
-                url: ${FEIGN_FILE:http://file-service:8084/file}
+                url: ${FEIGN_FILE:}
                 connect-timeout: 30000
                 read-timeout: 60000
             auth-service:
-                url: ${FEIGN_AUTH:http://auth-service:8080/authentication}
+                url: ${FEIGN_AUTH:}
                 connect-timeout: 30000
                 read-timeout: 60000
             product-service:
-                url: ${FEIGN_PRODUCT:http://product-service:8083/product}
+                url: ${FEIGN_PRODUCT:}
                 connect-timeout: 30000
                 read-timeout: 60000
 jwt:
-  signerKey: ${JWT_SIGNERKEY:"1TjXchw5FloESb63Kc+DFhTARvpWL4jUGCwfGWxuG5SIf/1y/LgJxHnMqaF6A/ij"}
+  signerKey: ${JWT_SIGNERKEY:}
 
 
 logging:

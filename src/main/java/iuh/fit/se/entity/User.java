@@ -59,8 +59,11 @@ public class User {
     String publicId;
 
     String phone;
+<<<<<<< Updated upstream
 
     String birthdate;
+=======
+>>>>>>> Stashed changes
     @PrePersist
     void generateValue() {
         this.points = 0;
