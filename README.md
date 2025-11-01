@@ -130,7 +130,6 @@ Dự án này được phân phối dưới giấy phép MIT. Xem file [LICENSE]
 
 ## 👥 Liên Hệ
 - Author: [Hồ Huỳnh Hoài Thịnh] ([@github-hohuynhhoaithinh](https://github.com/hohuynhhoaithinh))
-- Issues: [Tạo issue mới](https://github.com/shopping-ecommerce/user-service/issues/new)
 - Email: [hohuynhhoaithinh@gmail.com]
 
 ---
