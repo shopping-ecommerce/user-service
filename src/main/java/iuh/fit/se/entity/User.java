@@ -57,13 +57,9 @@ public class User {
 
     @Column(name = "public_id")
     String publicId;
-
     String phone;
-<<<<<<< Updated upstream
-
     String birthdate;
-=======
->>>>>>> Stashed changes
+
     @PrePersist
     void generateValue() {
         this.points = 0;
