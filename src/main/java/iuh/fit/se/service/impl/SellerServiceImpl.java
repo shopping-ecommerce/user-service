@@ -309,4 +309,9 @@ public class SellerServiceImpl implements SellerService {
         }
     }
 
+    @Override
+    public List<String> getAllSellerEmails() {
+        return sellerRepository.findAllEmails();
+    }
+
 }
