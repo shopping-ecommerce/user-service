@@ -122,4 +122,13 @@ public class SellerController {
                 .message("Đã xóa Seller " + sellerId  + " seller")
                 .build();
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/emails")
+    public ApiResponse<List<String>> getAllSellerEmails() {
+        return ApiResponse.<List<String>>builder()
+                .code(200)
+                .result(sellerService.getAllSellerEmails())
+                .build();
+    }
 }

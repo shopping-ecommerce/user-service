@@ -24,4 +24,6 @@ public interface SellerService {
 
     @Transactional
     void deleteSeller(String sellerId, String reason);
+
+    List<String> getAllSellerEmails();
 }
