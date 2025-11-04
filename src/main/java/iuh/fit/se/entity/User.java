@@ -7,7 +7,6 @@ import java.util.List;
 import jakarta.persistence.*;
 
 import iuh.fit.se.entity.enums.UserStatusEnum;
-import iuh.fit.se.entity.enums.UserTierEnum;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -33,9 +32,6 @@ public class User {
     String lastName;
 
     int points;
-
-    @Enumerated(EnumType.STRING)
-    UserTierEnum tier;
 
     @ElementCollection
     @CollectionTable(name = "user_addresses", joinColumns = @JoinColumn(name = "user_id"))
@@ -63,7 +59,6 @@ public class User {
     @PrePersist
     void generateValue() {
         this.points = 0;
-        this.tier = UserTierEnum.NONE;
         this.status = UserStatusEnum.AVAILABLE;
         this.createdTime = LocalDateTime.now();
         this.modifiedTime = LocalDateTime.now();

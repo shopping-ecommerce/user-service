@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -37,9 +38,6 @@ public class Seller {
     List<String> identificationLinks;
 
     String address;
-
-    double wallet;
-
     @Enumerated(EnumType.STRING)
     SellerStatusEnum status;
 
@@ -50,14 +48,25 @@ public class Seller {
     LocalDateTime createdTime;
 
     LocalDateTime modifiedTime;
+    @Column(name = "violation_count")
+    Integer violationCount;
+    @Column(name = "suspended_at")
+    LocalDateTime suspendedAt;
+    @Column(name = "suspension_end_date")
+    LocalDateTime suspensionEndDate;
+    @Column(name = "suspension_reason")
+    String suspensionReason;
 
+    @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    List<ViolationRecord> violationHistory = new ArrayList<>();
     @PrePersist
     void prePersist() {
         this.registrationDate = LocalDateTime.now();
         this.createdTime = LocalDateTime.now();
         this.modifiedTime = LocalDateTime.now();
         this.status = SellerStatusEnum.PENDING;
-        this.wallet = 0.0;
+        this.violationCount = 0;
     }
 
     @PreUpdate

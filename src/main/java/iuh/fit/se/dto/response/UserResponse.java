@@ -6,7 +6,6 @@ import java.util.List;
 
 import iuh.fit.se.entity.Address;
 import iuh.fit.se.entity.enums.UserStatusEnum;
-import iuh.fit.se.entity.enums.UserTierEnum;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -21,7 +20,6 @@ public class UserResponse {
     String firstName;
     String lastName;
     int points;
-    UserTierEnum tier;
     List<Address> addresses = new ArrayList<>();
     List<String> favoriteProducts = new ArrayList<>();
 

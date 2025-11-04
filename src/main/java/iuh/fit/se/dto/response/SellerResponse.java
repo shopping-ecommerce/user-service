@@ -1,10 +1,13 @@
 package iuh.fit.se.dto.response;
 
+import iuh.fit.se.entity.ViolationRecord;
 import iuh.fit.se.entity.enums.SellerStatusEnum;
+import jakarta.persistence.Column;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Builder
@@ -20,8 +23,13 @@ public class SellerResponse {
     String avatarLink;
     String email;
     List<String> identificationLink;
-    double wallet;
     LocalDateTime registrationDate;
     String address;
     SellerStatusEnum status;
+    Integer violationCount;
+    LocalDateTime suspendedAt;
+    LocalDateTime suspensionEndDate;
+    String suspensionReason;
+    List<ViolationRecordSummary> violationHistory = new ArrayList<>();
+
 }

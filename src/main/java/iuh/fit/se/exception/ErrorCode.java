@@ -83,7 +83,9 @@ public enum ErrorCode {
     PRODUCT_ALREADY_IN_FAVORITES(1049,"Product already in favorites",HttpStatus.BAD_REQUEST),
     PRODUCT_NOT_IN_FAVORITES(1050,"Product not in favorites",HttpStatus.BAD_REQUEST),
     PRODUCT_SERVICE_ERROR(1051,"Product service error",HttpStatus.BAD_GATEWAY),
-    FILE_DELETE_FAILED(1052,"File delete failed",HttpStatus.INTERNAL_SERVER_ERROR);
+    FILE_DELETE_FAILED(1052,"File delete failed",HttpStatus.INTERNAL_SERVER_ERROR),
+    SELLER_NOT_APPROVED(1053,"Seller not approved",HttpStatus.FORBIDDEN),
+    SELLER_NOT_SUSPENDED(1054,"Seller not suspended",HttpStatus.BAD_REQUEST);
 
     int code;
     String message;
