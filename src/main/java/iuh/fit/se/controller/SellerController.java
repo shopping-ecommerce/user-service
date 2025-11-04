@@ -1,9 +1,11 @@
 package iuh.fit.se.controller;
 
+import iuh.fit.se.dto.request.ReportViolationRequest;
 import iuh.fit.se.dto.request.SellerRegistrationRequest;
 import iuh.fit.se.dto.request.SellerVerifyRequest;
 import iuh.fit.se.dto.response.ApiResponse;
 import iuh.fit.se.dto.response.SellerResponse;
+import iuh.fit.se.entity.ViolationRecord;
 import iuh.fit.se.service.SellerService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -66,6 +68,22 @@ public class SellerController {
                 .build();
     }
 
+    @GetMapping("/sellerApproved")
+    public ApiResponse<List<SellerResponse>> searchSellerApproved() {
+        List<SellerResponse> sellers = sellerService.searchSellerApproved();
+        if (sellers.isEmpty()) {
+            return ApiResponse.<List<SellerResponse>>builder()
+                    .code(200)
+                    .message("Không có seller nào được approved")  // Add message field to ApiResponse
+                    .result(List.of())  // Empty list of SellerResponse
+                    .build();
+        }
+        return ApiResponse.<List<SellerResponse>>builder()
+                .code(200)
+                .message("Sellers retrieved successfully")
+                .result(sellers)
+                .build();
+    }
     @PreAuthorize("hasAuthority('UPDATE_SELLER')")
     @PostMapping("/updateInfSeller")
     public ApiResponse<SellerResponse> updateInfSeller(@RequestPart("avatar") MultipartFile avatar,
@@ -123,12 +141,53 @@ public class SellerController {
                 .build();
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/emails")
     public ApiResponse<List<String>> getAllSellerEmails() {
         return ApiResponse.<List<String>>builder()
                 .code(200)
                 .result(sellerService.getAllSellerEmails())
+                .build();
+    }
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/report-violation")
+    public ApiResponse<SellerResponse> reportViolation(
+            @RequestBody ReportViolationRequest request) {
+        return ApiResponse.<SellerResponse>builder()
+                .code(200)
+                .message("Violation reported successfully")
+                .result(sellerService.reportViolation(request))
+                .build();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/unsuspend/{sellerId}")
+    public ApiResponse<SellerResponse> unsuspendSeller(
+            @PathVariable String sellerId) {
+        return ApiResponse.<SellerResponse>builder()
+                .code(200)
+                .message("Seller unsuspended successfully")
+                .result(sellerService.unsuspendSeller(sellerId))
+                .build();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/suspended")
+    public ApiResponse<List<SellerResponse>> getSuspendedSellers() {
+        return ApiResponse.<List<SellerResponse>>builder()
+                .code(200)
+                .result(sellerService.getAllSellerStatusSuspended())
+                .build();
+    }
+
+    @GetMapping("/{sellerId}/violations")
+    public ApiResponse<List<ViolationRecord>> getSellerViolations(
+            @PathVariable String sellerId) {
+
+
+        return ApiResponse.<List<ViolationRecord>>builder()
+                .code(200)
+                .result(sellerService.getViolationHistory(sellerId))
                 .build();
     }
 }

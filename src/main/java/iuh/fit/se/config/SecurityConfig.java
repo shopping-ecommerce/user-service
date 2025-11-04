@@ -25,6 +25,7 @@ public class SecurityConfig {
     private final String[] PULIC_ENDPOINTS = {"/profiles/create",
             "/sellers/searchByUserId/**",
             "/sellers/searchBySellerId/**",
+            "/sellers/sellerApproved"
     };
 
     private CustomJwtDecoder customJwtDecoder;

@@ -9,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import iuh.fit.se.entity.enums.UserStatusEnum;
-import iuh.fit.se.entity.enums.UserTierEnum;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -39,7 +38,6 @@ public class UserCreationRequest {
     String address;
 
     int points;
-    UserTierEnum tier;
     UserStatusEnum status;
     String publicId;
     LocalDateTime createdTime;

@@ -1,8 +1,9 @@
 package iuh.fit.se.service;
 
-import iuh.fit.se.dto.request.SellerRegistrationRequest;
+import iuh.fit.se.dto.request.ReportViolationRequest;
 import iuh.fit.se.dto.request.SellerVerifyRequest;
 import iuh.fit.se.dto.response.SellerResponse;
+import iuh.fit.se.entity.ViolationRecord;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,6 +19,8 @@ public interface SellerService {
     SellerResponse updateInfSeller(String sellerId,String shopName,MultipartFile avatar,String address,String email);
     List<SellerResponse> searchSellerPending();
 
+    List<SellerResponse> searchSellerApproved();
+
     List<SellerResponse> getAllSellers();
 
     void deleteSellers(List<String> sellerIds);
@@ -26,4 +29,12 @@ public interface SellerService {
     void deleteSeller(String sellerId, String reason);
 
     List<String> getAllSellerEmails();
+    SellerResponse reportViolation(ReportViolationRequest request);
+    SellerResponse unsuspendSeller(String sellerId);
+    void autoUnsuspendExpiredSellers();
+    List<SellerResponse> getAllSellerStatusSuspended();
+    List<ViolationRecord> getViolationHistory(String sellerId);
+
+    @Transactional
+    int suspendAllApproved();
 }
