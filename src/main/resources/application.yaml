@@ -54,7 +54,9 @@ spring:
 jwt:
   signerKey: ${JWT_SIGNERKEY:}
 
-
+feign:
+  auth:
+    internal-token: ${INTERNAL_SERVICE_TOKEN:}   # inject từ ENV
 logging:
   level:
     iuh.fit.se.service.impl: DEBUG

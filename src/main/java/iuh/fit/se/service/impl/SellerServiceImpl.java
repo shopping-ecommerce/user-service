@@ -2,6 +2,7 @@ package iuh.fit.se.service.impl;
 
 import feign.FeignException;
 import iuh.fit.event.dto.SellerSuspensionEvent;
+import iuh.fit.event.dto.SellerUnsuspensionEvent;
 import iuh.fit.event.dto.SellerVerificationEvent;
 import iuh.fit.event.dto.SellerWarningEvent;
 import iuh.fit.se.dto.request.*;
@@ -319,8 +320,12 @@ public class SellerServiceImpl implements SellerService {
             seller.setStatus(SellerStatusEnum.SUSPENDED);
             seller.setSuspensionReason(suspensionInfo.getReason());
             seller.setSuspendedAt(LocalDateTime.now());
-            seller.setSuspensionEndDate(suspensionInfo.getEndDate());
+            // Làm tròn suspensionEndDate lên 00:00 ngày hôm sau
+            LocalDateTime endDate = suspensionInfo.getEndDate();
+            LocalDateTime roundedEndDate = endDate.toLocalDate().plusDays(1).atStartOfDay();
+            seller.setSuspensionEndDate(roundedEndDate);
 
+            productClient.suspendAllProductsBySeller(seller.getId(), suspensionInfo.getReason());
             kafkaTemplate.send("seller-suspension", SellerSuspensionEvent.builder()
                     .sellerId(seller.getId())
                     .sellerEmail(seller.getEmail())
@@ -378,7 +383,12 @@ public class SellerServiceImpl implements SellerService {
         seller.setSuspendedAt(null);
         seller.setSuspensionEndDate(null);
         seller.setModifiedTime(LocalDateTime.now());
-
+        productClient.activateAllProductsBySeller(seller.getId());
+        kafkaTemplate.send("seller-unsuspension", SellerUnsuspensionEvent.builder()
+                .sellerId(seller.getId())
+                .sellerEmail(seller.getEmail())
+                .unsuspendedAt(LocalDateTime.now())
+                .build());
         return sellerMapper.toSellerResponse(sellerRepository.save(seller));
     }
 

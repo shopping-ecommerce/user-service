@@ -30,6 +30,7 @@ public class SellerResponse {
     LocalDateTime suspendedAt;
     LocalDateTime suspensionEndDate;
     String suspensionReason;
-    List<ViolationRecordSummary> violationHistory = new ArrayList<>();
+    @Builder.Default
+    List<ViolationRecord> violationHistory = new ArrayList<>();
 
 }
