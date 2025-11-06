@@ -34,5 +34,13 @@ public interface SellerRepository extends JpaRepository<Seller, String> {
 """)
     int bulkSuspendAllApprovedJpql(@Param("reason") String reason);
 
-
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Transactional
+    @Query("""
+        UPDATE Seller s
+           SET s.violationCount = 0,
+               s.modifiedTime = CURRENT_TIMESTAMP
+         WHERE s.violationCount IS NULL OR s.violationCount <> 0
+    """)
+    int resetAllViolationCountToZero();
 }
