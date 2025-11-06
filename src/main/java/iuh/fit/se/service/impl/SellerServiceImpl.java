@@ -432,6 +432,15 @@ public class SellerServiceImpl implements SellerService {
         log.warn("Bulk update (status only): {} seller APPROVED -> SUSPENDED", affected);
         return affected;
     }
+
+    @Override
+    @Transactional
+    public int resetMonthlyViolationCounters() {
+        int affected = sellerRepository.resetAllViolationCountToZero();
+        log.info("Monthly violation reset executed, rows affected = {}", affected);
+        return affected;
+    }
+
     @Data
     @Builder
     private static class SuspensionInfo {

@@ -37,4 +37,9 @@ public interface SellerService {
 
     @Transactional
     int suspendAllApproved();
+    /**
+     * Reset violationCount về 0 cho tất cả Seller.
+     * @return số bản ghi được cập nhật
+     */
+    int resetMonthlyViolationCounters();
 }
