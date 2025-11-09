@@ -85,7 +85,15 @@ public enum ErrorCode {
     PRODUCT_SERVICE_ERROR(1051,"Product service error",HttpStatus.BAD_GATEWAY),
     FILE_DELETE_FAILED(1052,"File delete failed",HttpStatus.INTERNAL_SERVER_ERROR),
     SELLER_NOT_APPROVED(1053,"Seller not approved",HttpStatus.FORBIDDEN),
-    SELLER_NOT_SUSPENDED(1054,"Seller not suspended",HttpStatus.BAD_REQUEST);
+    SELLER_NOT_SUSPENDED(1054,"Seller not suspended",HttpStatus.BAD_REQUEST),
+    INVALID_APPEAL_TYPE(400, "Invalid appeal type",HttpStatus.BAD_REQUEST),
+    APPEAL_ALREADY_EXISTS(400, "Appeal already exists for this violation",HttpStatus.BAD_REQUEST),
+    VIOLATION_NOT_FOUND(404, "Violation record not found",HttpStatus.NOT_FOUND),
+    APPEAL_DEADLINE_PASSED(400, "Appeal deadline has passed (7 days)",HttpStatus.BAD_REQUEST),
+    APPEAL_NOT_FOUND(404, "Appeal not found",HttpStatus.NOT_FOUND),
+    APPEAL_ALREADY_REVIEWED(400, "Appeal has already been reviewed",HttpStatus.BAD_REQUEST),
+    UNSUSPEND_FAILED(500, "Failed to unsuspend seller",HttpStatus.INTERNAL_SERVER_ERROR),
+    PRODUCT_RESTORE_FAILED(500, "Failed to restore product",HttpStatus.UNAUTHORIZED);
 
     int code;
     String message;

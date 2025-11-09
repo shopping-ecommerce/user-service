@@ -23,6 +23,8 @@ public class ViolationRecord {
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
+    @Column(name = "product_id")
+    String productId;
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "seller_id", nullable = false)
             @JsonIgnore
