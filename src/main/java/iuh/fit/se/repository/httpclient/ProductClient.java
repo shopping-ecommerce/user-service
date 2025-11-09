@@ -7,9 +7,11 @@ import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
 import iuh.fit.se.dto.response.ApiResponse;
 import iuh.fit.se.dto.response.ProductResponse;
+import iuh.fit.se.dto.response.enums.Status;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,6 +46,13 @@ public interface ProductClient {
     @PostMapping("/activateAllBySeller")
     ApiResponse<Void> activateAllProductsBySeller(
             @RequestParam("sellerId") String sellerId
+    );
+
+    @PostMapping("/approve/{productId}")
+    public ApiResponse<ProductResponse> approveProduct(
+            @PathVariable("productId") String productId,
+            @RequestParam("status") Status status,
+            @RequestParam(value = "reason", required = false) String reason
     );
 
     class Configuration {
