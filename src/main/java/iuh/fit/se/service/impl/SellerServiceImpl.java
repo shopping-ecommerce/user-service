@@ -307,6 +307,7 @@ public class SellerServiceImpl implements SellerService {
                 .evidenceUrls(request.getEvidenceUrls())
                 .reportedAt(LocalDateTime.now())
                 .violationNumber(currentViolations)
+                .productId(request.getProductId())
                 .build();
 
         if (seller.getViolationHistory() == null) {
