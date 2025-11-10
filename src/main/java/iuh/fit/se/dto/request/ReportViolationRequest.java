@@ -15,5 +15,6 @@ public class ReportViolationRequest {
     private String sellerId;
     private String violationType;  // FAKE_PRODUCT, POOR_SERVICE, DELAYED_SHIPPING, etc.
     private String description;
-    private List<String> evidenceUrls;  // Link ảnh chứng cứ
+    private List<String> evidenceUrls;  // Link ảnh chứng cứ,
+    private String productId;  // ID sản phẩm vi phạm (nếu có)
 }
