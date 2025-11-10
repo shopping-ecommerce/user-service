@@ -42,11 +42,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class SellerServiceImpl implements SellerService {
-
     private static final int VIOLATION_LEVEL_1 = 3;   // 7 ngày
     private static final int VIOLATION_LEVEL_2 = 5;   // 30 ngày
     private static final int VIOLATION_LEVEL_3 = 10;  // 6 tháng
-
     UserRepository userRepository;
     SellerRepository sellerRepository;
     SellerMapper sellerMapper;
@@ -54,7 +52,6 @@ public class SellerServiceImpl implements SellerService {
     ProductClient productClient;
     AuthClient authClient;
     KafkaTemplate<String, Object> kafkaTemplate;
-
     @Override
     public SellerResponse createSeller(MultipartFile avatar, List<MultipartFile> identifications, String userId, String shopName, String email, String address) {
         User user = userRepository.findById(userId)

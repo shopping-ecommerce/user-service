@@ -31,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
@@ -127,7 +128,6 @@ public class AppealServiceImpl implements AppealService {
 
         return appealMapper.toResponse(savedAppeal);
     }
-
     @Override
     public List<AppealResponse> getAppealsBySeller(String sellerId) {
         List<Appeal> appeals = appealRepository.findBySellerIdOrderBySubmittedAtDesc(sellerId);
@@ -135,6 +135,7 @@ public class AppealServiceImpl implements AppealService {
                 .map(appealMapper::toResponse)
                 .collect(Collectors.toList());
     }
+
 
     @Override
     public List<AppealResponse> getPendingAppeals() {
