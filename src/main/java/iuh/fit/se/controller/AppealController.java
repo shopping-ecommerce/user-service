@@ -14,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/appeals")
+    @RequestMapping("/appeals")
 @RequiredArgsConstructor
 @Slf4j
 public class AppealController {
@@ -79,6 +79,15 @@ public class AppealController {
         return ApiResponse.<AppealDetailResponse>builder()
                 .code(200)
                 .result(appealService.getAppealDetail(appealId))
+                .build();
+    }
+    @PostMapping ("/exists")
+    public ApiResponse<Boolean> hasAppealed(
+            @RequestParam("sellerId") String sellerId,
+            @RequestParam("violationRecordId") String violationRecordId) {
+        return ApiResponse.<Boolean>builder()
+                .code(200)
+                .result(appealService.hasAppealed(sellerId, violationRecordId))
                 .build();
     }
 }
