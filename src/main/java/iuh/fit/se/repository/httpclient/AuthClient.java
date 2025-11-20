@@ -4,9 +4,12 @@ import iuh.fit.se.config.AuthenticationRequestInterceptor;
 import iuh.fit.se.config.FeignConfiguration;
 import iuh.fit.se.dto.request.AssignRoleRequest;
 import iuh.fit.se.dto.request.RevokeRoleRequest;
+import iuh.fit.se.dto.response.ApiResponse;
 import iuh.fit.se.dto.response.AuthClientResponse;
+import iuh.fit.se.dto.response.AuthResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -16,4 +19,6 @@ public interface AuthClient {
     AuthClientResponse assignRoleToUser(@RequestBody AssignRoleRequest request);
     @PostMapping(value = "/revoke-role" , consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
     AuthClientResponse revokeRoleFromUser(@RequestBody RevokeRoleRequest request);
+    @GetMapping("/users/myinfo")
+    ApiResponse<AuthResponse> getMyInfo();
 }

@@ -7,14 +7,17 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import feign.FeignException;
+import iuh.fit.event.dto.UserBanned;
 import iuh.fit.se.dto.request.*;
 import iuh.fit.se.dto.response.ApiResponse;
 import iuh.fit.se.dto.response.FileClientResponse;
 import iuh.fit.se.dto.response.ProductResponse;
 import iuh.fit.se.dto.response.enums.Status;
 import iuh.fit.se.entity.Address;
+import iuh.fit.se.repository.httpclient.AuthClient;
 import iuh.fit.se.repository.httpclient.FileClient;
 import iuh.fit.se.repository.httpclient.ProductClient;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +46,9 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final FileClient fileClient;
     private  final ProductClient productClient;
+    private final AuthClient authClient;
+    private static final int MAX_CANCEL_POINTS = 5;
+    private final KafkaTemplate<String,Object> kafkaTemplate;
     /**
      * Creates a new user based on the provided UserCreationRequest.
      *
@@ -542,6 +548,43 @@ public class UserServiceImpl implements UserService {
         return favoriteProducts;
     }
 
+    @Override
+    @Transactional
+    public void incrementCancelPenaltyPoints(String userId) {
+        log.info("Incrementing cancel count for user {}", userId);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        user.setPoints(user.getPoints() + 1);
+        user.setModifiedTime(LocalDateTime.now());
+
+        log.warn("User {} cancel penalty points: {}/{}", userId, user.getPoints(), MAX_CANCEL_POINTS);
+
+        if (user.getPoints() >= MAX_CANCEL_POINTS) {
+            log.error("User {} has reached cancel limit ({}) - BANNED from ordering",
+                    userId, MAX_CANCEL_POINTS);
+            kafkaTemplate.send("user-banned", UserBanned.builder().userId(userId)
+                            .userName(user.getLastName())
+                            .reason("Bạn đã bị cấm đặt hàng do hủy quá " + MAX_CANCEL_POINTS+" lần")
+                    .build());
+        } else if (user.getPoints() >= 3) {
+            log.warn("User {} is approaching cancel limit ({}/{})",
+                    userId, user.getPoints(), MAX_CANCEL_POINTS);
+        }
+
+        userRepository.save(user);
+        // Không cần return UserResponse vì Kafka consumer không cần dùng
+    }
+
+    @Override
+    public boolean canPlaceOrder(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        return user.getPoints() < MAX_CANCEL_POINTS;
+    }
+
+
     private void validateAddress(Address address) {
         if (address == null || address.getAddress() == null || address.getAddress().trim().isEmpty()) {
             throw new AppException(ErrorCode.INVALID_ADDRESS);
@@ -585,5 +628,30 @@ public class UserServiceImpl implements UserService {
         if (!hasDefault && !addresses.isEmpty()) {
             addresses.get(0).setDefault(true);
         }
+    }
+    @Override
+    @Transactional
+    public int resetMonthlyPenaltyPoints() {
+        log.info("Starting monthly reset of user penalty points");
+
+        List<User> allUsers = userRepository.findAll();
+        int updatedCount = 0;
+
+        for (User user : allUsers) {
+            if (user.getPoints() > 0) {
+                user.setPoints(0);
+                user.setModifiedTime(LocalDateTime.now());
+                updatedCount++;
+            }
+        }
+
+        if (updatedCount > 0) {
+            userRepository.saveAll(allUsers);
+            log.info("Successfully reset penalty points for {} users", updatedCount);
+        } else {
+            log.info("No users had penalty points to reset");
+        }
+
+        return updatedCount;
     }
 }

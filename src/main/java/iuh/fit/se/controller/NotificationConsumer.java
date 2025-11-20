@@ -1,9 +1,11 @@
 package iuh.fit.se.controller;
 
+import iuh.fit.event.dto.OrderStatusChangedEvent;
 import iuh.fit.event.dto.PolicyEnforceEvent;
 import iuh.fit.event.dto.SellerViolationEvent;
 import iuh.fit.se.dto.request.ReportViolationRequest;
 import iuh.fit.se.service.SellerService;
+import iuh.fit.se.service.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class NotificationConsumer {
     SellerService  sellerService;
+    UserService userService;
     @KafkaListener(topics = "policy-enforce-topic")
     public void handleOrderCreatedEvent(PolicyEnforceEvent event) {
         log.info("Nhận được sự kiện policy-enforce: {}", event);
@@ -34,5 +37,10 @@ public class NotificationConsumer {
                 .violationType("SELLER_TIMEOUT")
                 .description(String.format("Seller vi phạm do không xử lý đơn hàng đúng hạn. #%s", event.getOrderId()))
                 .build());
+    }
+    @KafkaListener(topics = "user-cancel-order")
+    public void  handleUserCancelOrder(OrderStatusChangedEvent event) {
+        log.info("Nhận được sự kiện user-cancel-order: {}", event);
+        userService.incrementCancelPenaltyPoints(event.getUserId());
     }
 }
