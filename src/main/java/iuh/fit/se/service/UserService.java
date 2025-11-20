@@ -42,4 +42,12 @@ public interface UserService {
     UserResponse removeFavoriteProduct(FavoriteRequest request);
 
     List<ProductResponse> getFavoriteProducts(String userId);
+    void incrementCancelPenaltyPoints(String userId);
+
+    boolean canPlaceOrder(String userId);
+    /**
+     * Reset penalty points for all users (monthly job)
+     * @return number of users updated
+     */
+    int resetMonthlyPenaltyPoints();
 }

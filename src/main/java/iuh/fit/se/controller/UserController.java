@@ -235,4 +235,11 @@ public class UserController {
                 .result(userService.getFavoriteProducts(userId))
                 .build();
     }
+
+    @GetMapping("/canOrder")
+    public ApiResponse<Boolean> canOrder(@RequestParam String userId) {
+        return ApiResponse.<Boolean>builder()
+                .result(userService.canPlaceOrder(userId))
+                .build();
+    }
 }
