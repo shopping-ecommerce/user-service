@@ -117,7 +117,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserResponse> findUsers() {
         List<User> users = userRepository.findAll();
-        return objectMapper.convertValue(users, new TypeReference<List<UserResponse>>() {});
+
+        // Filter out the user with the name "Quản trị viên"
+        List<User> filteredUsers = users.stream()
+                .filter(user -> !(user.getFirstName().equals("Quản trị") && user.getLastName().equals("viên")))
+                .toList();
+
+        return objectMapper.convertValue(filteredUsers, new TypeReference<List<UserResponse>>() {});
     }
 
     /**
